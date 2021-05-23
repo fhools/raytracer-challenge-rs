@@ -1,5 +1,5 @@
 [package]
-name = "raytracer-challenge-rs"
+name = "types"
 version = "0.1.0"
 authors = ["fhools <fhools@gmail.com>"]
 edition = "2018"
@@ -7,5 +7,4 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-utils = { path="src/utils" }
-types = { path="src/types" }
+utils = { path = "../utils" }
