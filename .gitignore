@@ -1,1 +1,3 @@
 **/target
+src/types/Cargo.lock
+src/utils/Cargo.lock
