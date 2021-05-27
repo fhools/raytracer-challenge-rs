@@ -58,6 +58,18 @@ fn matrix2x2_mul() {
 }
 
 #[test]
+fn matrix3x3_submatrix() {
+    let m = Matrix3x3::from_vector(&vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]);
+
+    let n = m.submatrix(1,1);
+
+    assert!(f64_eq(n.m[0][0], 1.0));;
+    assert!(f64_eq(n.m[0][1], 3.0));
+    assert!(f64_eq(n.m[1][0], 7.0));
+    assert!(f64_eq(n.m[1][1], 9.0));
+}
+
+#[test]
 fn matrix_eq() {
     let m = Matrix4x4::new();
     let n = Matrix4x4::new();
@@ -78,11 +90,93 @@ fn matrix_eq() {
     let t = Matrix3x3::new();
     assert!(!s.eq(&t));
     assert!(!t.eq(&s));
+}
 
+#[test]
+fn matrix2x2_transpose() {
+    let mut m = Matrix2x2::new();
+    m.m[0][0] = 2.0;
+    m.m[0][1] = 3.0;
+    m.m[1][0] = 5.0;
+    m.m[1][1] = 4.0;
 
+    let n = m.transpose();
 
+    assert!(f64_eq(n.m[0][0], 2.0));
+    assert!(f64_eq(n.m[0][1], 5.0));
+    assert!(f64_eq(n.m[1][0], 3.0));
+    assert!(f64_eq(n.m[1][1], 4.0));
+}
 
+#[test]
+fn matrix3x3_transpose() {
+    let mut m = Matrix3x3::new();
+    m.m[0][0] = 1.0;
+    m.m[0][1] = 2.0;
+    m.m[0][2] = 3.0;
+    m.m[1][0] = 4.0;
+    m.m[1][1] = 5.0;
+    m.m[1][2] = 6.0;
+    m.m[2][0] = 7.0;
+    m.m[2][1] = 8.0;
+    m.m[2][2] = 9.0;
+
+    let n = m.transpose();
+
+    assert!(f64_eq(n.m[0][0], 1.0));
+    assert!(f64_eq(n.m[0][1], 4.0));
+    assert!(f64_eq(n.m[0][2], 7.0));
+    assert!(f64_eq(n.m[1][0], 2.0));
+    assert!(f64_eq(n.m[1][1], 5.0));
+    assert!(f64_eq(n.m[1][2], 8.0));
+    assert!(f64_eq(n.m[2][0], 3.0));
+    assert!(f64_eq(n.m[2][1], 6.0));
+    assert!(f64_eq(n.m[2][2], 9.0));
+}
+
+#[test]
+fn matrix4x4_transpose() {
+    let mut m = Matrix4x4::new();
+    m.m[0][0] = 1.0;
+    m.m[0][1] = 2.0;
+    m.m[0][2] = 3.0;
+    m.m[0][3] = 4.0;
+    m.m[1][0] = 5.0;
+    m.m[1][1] = 6.0;
+    m.m[1][2] = 7.0;
+    m.m[1][3] = 8.0;
+    m.m[2][0] = 9.0; 
+    m.m[2][1] = 10.0;
+    m.m[2][2] = 11.0;
+    m.m[2][3] = 12.0;
+    m.m[3][0] = 13.0;
+    m.m[3][1] = 14.0;
+    m.m[3][2] = 15.0;
+    m.m[3][3] = 16.0;
+
+    let n = m.transpose();
+
+    assert!(f64_eq(n.m[0][0], 1.0));
+    assert!(f64_eq(n.m[0][1], 5.0));
+    assert!(f64_eq(n.m[0][2], 9.0));
+    assert!(f64_eq(n.m[0][3], 13.0));
+    assert!(f64_eq(n.m[1][0], 2.0));
+    assert!(f64_eq(n.m[1][1], 6.0));
+    assert!(f64_eq(n.m[1][2], 10.0));
+    assert!(f64_eq(n.m[1][3], 14.0));
+    assert!(f64_eq(n.m[2][0], 3.0));
+    assert!(f64_eq(n.m[2][1], 7.0));
+    assert!(f64_eq(n.m[2][2], 11.0));
+    assert!(f64_eq(n.m[2][3], 15.0));
+    assert!(f64_eq(n.m[3][0], 4.0));
+    assert!(f64_eq(n.m[3][1], 8.0));
+    assert!(f64_eq(n.m[3][2], 12.0));
+    assert!(f64_eq(n.m[3][3], 16.0));
 }
 
 
-
+#[test]
+fn matrix2x2_determinant() {
+    let m = Matrix2x2::from_vector(&vec![1.0, 5.0, -3.0, 2.0]);
+    assert!(f64_eq(m.det(), 17.0));
+}
