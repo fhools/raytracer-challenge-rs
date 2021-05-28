@@ -8,6 +8,7 @@ edition = "2018"
 
 [lib]
 lib = { path="src/lib.rs" }
+
 [dependencies]
 utils = { path="src/utils" }
 types = { path="src/types" }

@@ -1,6 +1,5 @@
 use types::*;
 use utils::*;
-use std::cmp::Eq;
 
 #[test]
 fn matrix4x4_new() {
@@ -267,7 +266,7 @@ fn matrix4x4_inverse() {
     assert_eq!(format!("{:.5}", n_inv.m[1][3]), format!("{:.5}", -0.33333));
     assert_eq!(format!("{:.5}", n_inv.m[2][0]), format!("{:.5}", -0.02901));
     assert_eq!(format!("{:.5}", n_inv.m[2][1]), format!("{:.5}", -0.14630));
-    assert_eq!(format!("{:.5}", n_inv.m[2][2]), format!("{:.5}", -0.10926));;
+    assert_eq!(format!("{:.5}", n_inv.m[2][2]), format!("{:.5}", -0.10926));
     assert_eq!(format!("{:.5}", n_inv.m[2][3]), format!("{:.5}", 0.12963));
     assert_eq!(format!("{:.5}", n_inv.m[3][0]), format!("{:.5}", 0.17778));
     assert_eq!(format!("{:.5}", n_inv.m[3][1]), format!("{:.5}", 0.06667));
