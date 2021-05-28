@@ -47,7 +47,7 @@ impl Matrix4x4 {
         m.m[0][0] = v[0];
         m.m[0][1] = v[1];
         m.m[0][2] = v[2];
-        m.m[0][2] = v[3];
+        m.m[0][3] = v[3];
         m.m[1][0] = v[4];
         m.m[1][1] = v[5];
         m.m[1][2] = v[6];
@@ -62,6 +62,25 @@ impl Matrix4x4 {
         m.m[3][3] = v[15];
 
         m
+    }
+
+    pub fn submatrix(&self, row: usize, col: usize) -> Matrix3x3 {
+        let mut submat = Matrix3x3::new();
+        let mut sr = 0;
+
+        for i in 0..4 {
+            if i != row {
+                let mut sc = 0;
+                for j in 0..4 {
+                    if j != col {
+                        submat.m[sr][sc] = self.m[i][j];
+                        sc += 1;
+                    }
+                }
+                sr += 1;
+            }
+        }
+        submat
     }
 
     pub fn eq(&self, other: &Matrix4x4) -> bool {
@@ -97,6 +116,7 @@ impl Matrix4x4 {
         let r4 = vec![self.m[0][3], self.m[1][3], self.m[2][3], self.m[3][3]];
         Matrix4x4::from_vectors(&r1, &r2, &r3, &r4)
     }
+
 }
 
 #[derive(Debug)]
@@ -169,6 +189,15 @@ impl Matrix3x3 {
         submat
     }
 
+
+    pub fn minor(&self, row: usize, col: usize) -> f64 {
+        let sm = self.submatrix(row,col);
+        sm.det()
+    }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
+        self.minor(row,col) * if (row + col) % 2 == 1 { -1.0 } else { 1.0 } 
+    }
     pub fn eq(&self, other: &Matrix3x3) -> bool {
         for i in 0..3 {
             for j in 0..3 {

@@ -58,6 +58,23 @@ fn matrix2x2_mul() {
 }
 
 #[test]
+fn matrix4x4_submatrix() {
+    let m = Matrix4x4::from_vector(&vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0]);
+
+    let n = m.submatrix(1,1);
+
+    assert_f64_eq!(n.m[0][0], 1.0);;
+    assert_f64_eq!(n.m[0][1], 3.0);
+    assert_f64_eq!(n.m[0][2], 4.0);
+    assert_f64_eq!(n.m[1][0], 9.0);
+    assert_f64_eq!(n.m[1][1], 11.0);
+    assert_f64_eq!(n.m[1][2], 12.0);
+    assert_f64_eq!(n.m[2][0], 13.0);
+    assert_f64_eq!(n.m[2][1], 15.0);
+    assert_f64_eq!(n.m[2][2], 16.0);
+}
+
+#[test]
 fn matrix3x3_submatrix() {
     let m = Matrix3x3::from_vector(&vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]);
 
@@ -67,6 +84,20 @@ fn matrix3x3_submatrix() {
     assert!(f64_eq(n.m[0][1], 3.0));
     assert!(f64_eq(n.m[1][0], 7.0));
     assert!(f64_eq(n.m[1][1], 9.0));
+}
+
+#[test]
+fn matrix3x3_minor() {
+    let m = Matrix3x3::from_vector(&vec![3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+    let minor_1_0 = m.minor(1, 0);
+    assert_f64_eq!(minor_1_0, 25.0);
+}
+
+#[test]
+fn matrix3x3_cofactor() {
+    let m = Matrix3x3::from_vector(&vec![3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+    assert_f64_eq!(m.cofactor(0, 0), -12.0);
+    assert_f64_eq!(m.cofactor(1, 0), -25.0);
 }
 
 #[test]
