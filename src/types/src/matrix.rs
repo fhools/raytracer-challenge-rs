@@ -83,6 +83,42 @@ impl Matrix4x4 {
         submat
     }
 
+    pub fn minor(&self, row: usize, col: usize) -> f64 {
+        let sm = self.submatrix(row,col);
+        sm.det()
+    }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
+        self.minor(row,col) * if ((row + col) % 2) == 1 { -1.0 } else { 1.0 } 
+    }
+
+    pub fn det(&self) -> f64 {
+        let mut sum_cofactors_row1 = 0.0;
+        for i in 0..self.m[0].len() {
+            sum_cofactors_row1 += self.m[0][i] * self.cofactor(0, i);
+
+        }
+        sum_cofactors_row1
+    }
+
+    pub fn is_invertible(&self) -> bool {
+        return !f64_eq(self.det(), 0.0)
+    }
+
+    pub fn inverse(&self) -> Matrix4x4 {
+        if !self.is_invertible() {
+            panic!("matrix not invertible");
+        }
+
+        let mut vals = vec![];
+        for i in 0..self.m[0].len() {
+            for j in 0..self.m[0].len() {
+               vals.push(self.cofactor(j, i)/ self.det());
+            }
+        }
+        Matrix4x4::from_vector(&vals)
+    }
+
     pub fn eq(&self, other: &Matrix4x4) -> bool {
         for i in 0..4 {
             for j in 0..4 {
@@ -196,8 +232,36 @@ impl Matrix3x3 {
     }
 
     pub fn cofactor(&self, row: usize, col: usize) -> f64 {
-        self.minor(row,col) * if (row + col) % 2 == 1 { -1.0 } else { 1.0 } 
+        self.minor(row,col) * if ((row + col) % 2) == 1 { -1.0 } else { 1.0 } 
     }
+
+    pub fn det(&self) -> f64 {
+        let mut sum_cofactors_row1 = 0.0;
+        for i in 0..self.m[0].len() {
+            sum_cofactors_row1 += self.m[0][i] * self.cofactor(0, i);
+
+        }
+        sum_cofactors_row1
+    }
+
+    pub fn is_invertible(&self) -> bool {
+        return !f64_eq(self.det(), 0.0)
+    }
+    
+    pub fn inverse(&self) -> Matrix3x3 {
+        if !self.is_invertible() {
+            panic!("matrix not invertible");
+        }
+
+        let mut vals = vec![];
+        for i in 0..self.m[0].len() {
+            for j in 0..self.m[0].len() {
+               vals.push(self.cofactor(i, j)/ self.det());
+            }
+        }
+        Matrix3x3::from_vector(&vals)
+    }
+
     pub fn eq(&self, other: &Matrix3x3) -> bool {
         for i in 0..3 {
             for j in 0..3 {

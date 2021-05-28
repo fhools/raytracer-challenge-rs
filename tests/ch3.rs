@@ -63,7 +63,7 @@ fn matrix4x4_submatrix() {
 
     let n = m.submatrix(1,1);
 
-    assert_f64_eq!(n.m[0][0], 1.0);;
+    assert_f64_eq!(n.m[0][0], 1.0);
     assert_f64_eq!(n.m[0][1], 3.0);
     assert_f64_eq!(n.m[0][2], 4.0);
     assert_f64_eq!(n.m[1][0], 9.0);
@@ -80,7 +80,7 @@ fn matrix3x3_submatrix() {
 
     let n = m.submatrix(1,1);
 
-    assert!(f64_eq(n.m[0][0], 1.0));;
+    assert!(f64_eq(n.m[0][0], 1.0));
     assert!(f64_eq(n.m[0][1], 3.0));
     assert!(f64_eq(n.m[1][0], 7.0));
     assert!(f64_eq(n.m[1][1], 9.0));
@@ -210,4 +210,95 @@ fn matrix4x4_transpose() {
 fn matrix2x2_determinant() {
     let m = Matrix2x2::from_vector(&vec![1.0, 5.0, -3.0, 2.0]);
     assert!(f64_eq(m.det(), 17.0));
+}
+
+
+#[test]
+fn matrix3x3_determinant() {
+    let m = Matrix3x3::from_vector(&vec![1.0, 2.0, 6.0, -5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
+    assert_f64_eq!(m.det(), -196.0);
+}
+
+#[test]
+fn matrix4x4_determinant() {
+    let m = Matrix4x4::from_vector(&vec![-2.0, -8.0, 3.0, 5.0, -3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0]);
+    assert_f64_eq!(m.det(), -4071.0);
+}
+
+#[test]
+fn matrix3x3_is_invertible() {
+    let m = Matrix4x4::from_vector(&vec![-4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0]);
+    assert_eq!(false, m.is_invertible());
+}
+
+#[test]
+fn matrix4x4_inverse() {
+    let m = Matrix4x4::from_vector(&vec![8.0, -5.0, 9.0, 2.0, 7.0, 5.0, 6.0, 1.0, -6.0, 0.0, 9.0, 6.0, -3.0, 0.0, -9.0, -4.0]);
+
+    let m_inv = m.inverse();
+
+    assert_eq!(format!("{:.5}", m_inv.m[0][0]), format!("{:.5}", -0.15385));
+    assert_eq!(format!("{:.5}", m_inv.m[0][1]), format!("{:.5}",-0.15385));
+    assert_eq!(format!("{:.5}", m_inv.m[0][2]), format!("{:.5}",-0.28205));
+    assert_eq!(format!("{:.5}", m_inv.m[0][3]), format!("{:.5}",-0.53846));
+    assert_eq!(format!("{:.5}", m_inv.m[1][0]), format!("{:.5}",-0.07692));
+    assert_eq!(format!("{:.5}", m_inv.m[1][1]), format!("{:.5}",0.12308));
+    assert_eq!(format!("{:.5}", m_inv.m[1][2]), format!("{:.5}",0.02564));
+    assert_eq!(format!("{:.5}", m_inv.m[1][3]), format!("{:.5}",0.03077));
+    assert_eq!(format!("{:.5}", m_inv.m[2][0]), format!("{:.5}",0.35897));
+    assert_eq!(format!("{:.5}", m_inv.m[2][1]), format!("{:.5}",0.35897));
+    assert_eq!(format!("{:.5}", m_inv.m[2][2]), format!("{:.5}",0.43590));
+    assert_eq!(format!("{:.5}", m_inv.m[2][3]), format!("{:.5}",0.92308));
+    assert_eq!(format!("{:.5}", m_inv.m[3][0]), format!("{:.5}",-0.69231));
+    assert_eq!(format!("{:.5}", m_inv.m[3][1]), format!("{:.5}",-0.69231));
+    assert_eq!(format!("{:.5}", m_inv.m[3][2]), format!("{:.5}",-0.76923));
+    assert_eq!(format!("{:.5}", m_inv.m[3][3]), format!("{:.5}",-1.92308));
+
+    let n = Matrix4x4::from_vector(&vec![9.0, 3.0, 0.0, 9.0, -5.0, -2.0, -6.0, -3.0, -4.0, 9.0, 6.0, 4.0, -7.0, 6.0, 6.0, 2.0]);
+    let n_inv = n.inverse();
+
+    assert_eq!(format!("{:.5}", n_inv.m[0][0]), format!("{:.5}", -0.04074));
+    assert_eq!(format!("{:.5}", n_inv.m[0][1]), format!("{:.5}", -0.07778));
+    assert_eq!(format!("{:.5}", n_inv.m[0][2]), format!("{:.5}", 0.14444));
+    assert_eq!(format!("{:.5}", n_inv.m[0][3]), format!("{:.5}", -0.22222));
+    assert_eq!(format!("{:.5}", n_inv.m[1][0]), format!("{:.5}", -0.07778));
+    assert_eq!(format!("{:.5}", n_inv.m[1][1]), format!("{:.5}", 0.03333));
+    assert_eq!(format!("{:.5}", n_inv.m[1][2]), format!("{:.5}", 0.36667));
+    assert_eq!(format!("{:.5}", n_inv.m[1][3]), format!("{:.5}", -0.33333));
+    assert_eq!(format!("{:.5}", n_inv.m[2][0]), format!("{:.5}", -0.02901));
+    assert_eq!(format!("{:.5}", n_inv.m[2][1]), format!("{:.5}", -0.14630));
+    assert_eq!(format!("{:.5}", n_inv.m[2][2]), format!("{:.5}", -0.10926));;
+    assert_eq!(format!("{:.5}", n_inv.m[2][3]), format!("{:.5}", 0.12963));
+    assert_eq!(format!("{:.5}", n_inv.m[3][0]), format!("{:.5}", 0.17778));
+    assert_eq!(format!("{:.5}", n_inv.m[3][1]), format!("{:.5}", 0.06667));
+    assert_eq!(format!("{:.5}", n_inv.m[3][2]), format!("{:.5}", -0.26667));
+    assert_eq!(format!("{:.5}", n_inv.m[3][3]), format!("{:.5}", 0.33333));
+}
+
+
+#[test]
+fn matrix4x4_inverse_and_product() {
+    let a = Matrix4x4::from_vector(&vec![3.0, -9.0, 7.0, 3.0, 3.0, -8.0, 2.0, -9.0, -4.0, 4.0, 4.0, 1.0, -6.0, 5.0, -1.0, 1.0]);
+    let b = Matrix4x4::from_vector(&vec![8.0, 2.0, 2.0, 2.0, 3.0, -1.0, 7.0, 0.0, 7.0, 0.0, 5.0, 4.0, 6.0, -2.0, 0.0, 5.0]);
+
+    let c = a.mul(&b);
+
+    let should_a = c.mul(&b.inverse());
+
+    assert_f64_eq!(should_a.m[0][0], 3.0);
+    assert_f64_eq!(should_a.m[0][1], -9.0);
+    assert_f64_eq!(should_a.m[0][2], 7.0);
+    assert_f64_eq!(should_a.m[0][3], 3.0);
+    assert_f64_eq!(should_a.m[1][0], 3.0);
+    assert_f64_eq!(should_a.m[1][1], -8.0);
+    assert_f64_eq!(should_a.m[1][2], 2.0);
+    assert_f64_eq!(should_a.m[1][3], -9.0);
+    assert_f64_eq!(should_a.m[2][0], -4.0);
+    assert_f64_eq!(should_a.m[2][1], 4.0);
+    assert_f64_eq!(should_a.m[2][2], 4.0);
+    assert_f64_eq!(should_a.m[2][3], 1.0);
+    assert_f64_eq!(should_a.m[3][0], -6.0);
+    assert_f64_eq!(should_a.m[3][1], 5.0);
+    assert_f64_eq!(should_a.m[3][2], -1.0);
+    assert_f64_eq!(should_a.m[3][3], 1.0);
 }
