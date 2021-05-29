@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub, Mul, Neg, Div};
+use std::cmp::PartialEq;
 use utils::*;
 
 
@@ -41,6 +42,10 @@ impl Vector4D {
     pub fn norm(&self) -> f64 {
         let norm_sqr = self.x * self.x + self.y * self.y + self.z * self.z;
         norm_sqr.sqrt()
+    }
+
+    pub fn eq(self, r: &Vector4D) -> bool {
+        f64_eq(self.x, r.x) && f64_eq(self.y, r.y) && f64_eq(self.z, r.z) && f64_eq(self.w, r.w)
     }
 
     pub fn normalize(&mut self) {
@@ -131,3 +136,5 @@ impl Neg for Vector4D {
         }
     }
 }
+
+

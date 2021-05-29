@@ -1,5 +1,5 @@
 use utils::*;
-
+use super::Vector4D;
 #[derive(Debug)]
 pub struct Matrix4x4 {
     pub m: [[f64;4]; 4]
@@ -144,6 +144,15 @@ impl Matrix4x4 {
         prod
     }
 
+    pub fn mul_vector4d(&self, v: &Vector4D) -> Vector4D {
+        let mut vprime = Vector4D::new_vector(0.0, 0.0, 0.0);
+
+        vprime.x = self.m[0][0]*v.x + self.m[0][1]*v.y + self.m[0][2]*v.z + self.m[0][3]*v.w;
+        vprime.y = self.m[1][0]*v.x + self.m[1][1]*v.y + self.m[1][2]*v.z + self.m[1][3]*v.w;
+        vprime.z = self.m[2][0]*v.x + self.m[2][1]*v.y + self.m[2][2]*v.z + self.m[2][3]*v.w;
+        vprime.w = self.m[3][0]*v.x + self.m[3][1]*v.y + self.m[3][2]*v.z + self.m[3][3]*v.w;
+        vprime
+    }
 
     pub fn transpose(&self) -> Matrix4x4 {
         let r1 = vec![self.m[0][0], self.m[1][0], self.m[2][0], self.m[3][0]];
@@ -152,7 +161,60 @@ impl Matrix4x4 {
         let r4 = vec![self.m[0][3], self.m[1][3], self.m[2][3], self.m[3][3]];
         Matrix4x4::from_vectors(&r1, &r2, &r3, &r4)
     }
+    
+    pub fn translation(xt: f64, yt: f64, zt: f64) -> Matrix4x4 {
+        let mut t = Matrix4x4::new();
+        t.m[0][3] = xt;
+        t.m[1][3] = yt;
+        t.m[2][3] = zt;
+        t
+    }
 
+    pub fn scaling(xs: f64, ys: f64, zs: f64) -> Matrix4x4 {
+        let mut s = Matrix4x4::new();
+        s.m[0][0] = xs;
+        s.m[1][1] = ys;
+        s.m[2][2] = zs; 
+        s
+    }
+
+    pub fn rotate_x(rad: f64) -> Matrix4x4 {
+        let mut rx = Matrix4x4::new();
+        rx.m[1][1] = rad.cos();
+        rx.m[1][2] = -rad.sin();
+        rx.m[2][1] = rad.sin();
+        rx.m[2][2] = rad.cos();
+        rx
+    }
+
+    pub fn rotate_y(rad: f64) -> Matrix4x4 {
+        let mut ry = Matrix4x4::new();
+        ry.m[0][0] = rad.cos();
+        ry.m[0][2] = rad.sin();
+        ry.m[2][0] = -rad.sin();
+        ry.m[2][2] = rad.cos();
+        ry
+    }
+
+    pub fn rotate_z(rad: f64) -> Matrix4x4 {
+        let mut rz = Matrix4x4::new();
+        rz.m[0][0] = rad.cos();
+        rz.m[0][1] = -rad.sin();
+        rz.m[1][0] = rad.sin();
+        rz.m[1][1] = rad.cos();
+        rz
+    }
+
+    pub fn shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix4x4 {
+        let mut sh = Matrix4x4::new();
+        sh.m[0][1] = xy;
+        sh.m[0][2] = xz;
+        sh.m[1][0] = yx;
+        sh.m[1][2] = yz;
+        sh.m[3][0] = zx;
+        sh.m[3][1] = zy;
+        sh
+    }
 }
 
 #[derive(Debug)]
@@ -371,3 +433,35 @@ impl Matrix2x2 {
     }
 
 }
+
+
+pub struct MatrixChainer{
+    operations: Vec<Matrix4x4>,
+}
+
+
+
+impl MatrixChainer {
+    pub fn new() -> MatrixChainer {
+        MatrixChainer {
+            operations: vec![]
+        }
+    }
+    pub fn then<'a>(&'a mut self, m: Matrix4x4) -> &'a mut MatrixChainer {
+       self.operations.push(m);
+       self
+    }
+
+    pub fn finish(&mut self) -> Matrix4x4 {
+       let mut m : Matrix4x4;
+       if let Some(mm) = self.operations.pop() {
+           m = mm;
+           while let Some(n) = self.operations.pop() {
+               let m = n.mul(&m);
+           }
+           return m
+       }
+       panic!("no operations on MatrixChainer");
+    }
+}
+    
