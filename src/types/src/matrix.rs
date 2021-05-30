@@ -457,9 +457,7 @@ impl MatrixChainer {
        self.operations = self.operations.iter().rev().cloned().collect();
        if let Some(mm) = self.operations.pop() {
            m = mm;
-           println!("m: {:?}", m);
            while let Some(n) = self.operations.pop() {
-               println!("n: {:?}", n);
                m = n.mul(&m);
            }
            return m

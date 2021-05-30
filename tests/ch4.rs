@@ -1,5 +1,7 @@
 use types::*;
 use utils::*;
+extern crate raytracer_challenge_rs;
+use raytracer_challenge_rs::Canvas;
 use std::f64::consts::*;
 #[test]
 fn matrix4x4_translation() {
@@ -76,4 +78,37 @@ fn matrix4x4_chaining_operations() {
     let pp = op.mul_vector4d(&p);
     println!("pp: {:?}", pp);
     assert!(pp.eq(&Vector4D::new_point(15.0, 0.0, 7.0)));
+}
+
+
+#[test]
+fn test_draw_clock() {
+    const WIDTH: f64 = 100.0;
+
+    let radius = 3.0 / 8.0 * WIDTH; 
+
+    let mut hand = Vector4D::new_point(0.0, 0.0, 1.0);
+
+    let mut canvas = Canvas::new(WIDTH as usize, WIDTH as usize);
+
+    for i in 0..12 {
+        let hand_angle = i as f64 * 2.0 * PI / 12.0;
+        let rotate = Matrix4x4::rotate_y(hand_angle);
+        let scale = Matrix4x4::scaling(radius, 0.0, radius);
+        let translate = Matrix4x4::translation(50.0, 0.0, 50.0);
+        let final_hand = MatrixChainer::new()
+            .then(rotate)
+            .then(scale)
+            .then(translate)
+            .finish()
+            .mul_vector4d(&hand);
+        println!("{:?}", final_hand);
+
+        canvas.set_pixel(final_hand.x as usize, final_hand.z as usize,&Color::new(1.0, 0.0, 0.0));
+        canvas.set_pixel(final_hand.x as usize + 1, final_hand.z as usize,&Color::new(1.0, 0.0, 0.0));
+        canvas.set_pixel(final_hand.x as usize + 1, final_hand.z as usize + 1,&Color::new(1.0, 0.0, 0.0));
+        canvas.set_pixel(final_hand.x as usize, final_hand.z as usize + 1,&Color::new(1.0, 0.0, 0.0));
+    }
+
+    canvas.write_ppm("clock.ppm");
 }
