@@ -25,9 +25,16 @@ fn matrix4x4_scaling() {
 fn matrix4x4_rotate_x() {
     let p = Vector4D::new_vector(0.0, 1.0, 0.0);
     let pp = Matrix4x4::rotate_x(PI/2.0).mul_vector4d(&p);
+
     assert_f64_eq!(pp.x, 0.0);
     assert_f64_eq!(pp.y, 0.0);
     assert_f64_eq!(pp.z, 1.0);
+
+
+    let z = Vector4D::new_vector(0.0,0.0, 1.0);
+    let pz = Matrix4x4::rotate_x(PI/2.0).mul_vector4d(&z);
+
+    assert!(pz.eq(&Vector4D::new_vector(0.0,-1.0, 0.0)));
 }
 
 #[test]
@@ -48,6 +55,7 @@ fn matrix4x4_rotate_z() {
     assert_f64_eq!(pp.z, 0.0);
 }
 
+#[test]
 fn matrix4x4_shear() {
     let p = Vector4D::new_vector(2.0, 3.0, 4.0);
     let pp = Matrix4x4::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).mul_vector4d(&p);
@@ -56,6 +64,7 @@ fn matrix4x4_shear() {
 }
 
 
+#[test]
 fn matrix4x4_chaining_operations() {
     let p = Vector4D::new_point(1.0, 0.0, 1.0);
     let op = MatrixChainer::new()
@@ -65,6 +74,6 @@ fn matrix4x4_chaining_operations() {
         .finish();
 
     let pp = op.mul_vector4d(&p);
-
+    println!("pp: {:?}", pp);
     assert!(pp.eq(&Vector4D::new_point(15.0, 0.0, 7.0)));
 }

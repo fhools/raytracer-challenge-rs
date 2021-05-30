@@ -1,6 +1,6 @@
 use utils::*;
 use super::Vector4D;
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Matrix4x4 {
     pub m: [[f64;4]; 4]
 }
@@ -454,10 +454,13 @@ impl MatrixChainer {
 
     pub fn finish(&mut self) -> Matrix4x4 {
        let mut m : Matrix4x4;
+       self.operations = self.operations.iter().rev().cloned().collect();
        if let Some(mm) = self.operations.pop() {
            m = mm;
+           println!("m: {:?}", m);
            while let Some(n) = self.operations.pop() {
-               let m = n.mul(&m);
+               println!("n: {:?}", n);
+               m = n.mul(&m);
            }
            return m
        }
