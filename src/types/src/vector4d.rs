@@ -2,7 +2,6 @@ use std::ops::{Add, Sub, Mul, Neg, Div};
 use std::cmp::PartialEq;
 use utils::*;
 
-
 #[derive(Debug, Copy, Clone)]
 pub struct Vector4D {
     pub x: f64,
@@ -105,7 +104,7 @@ impl Add<Vector4D> for Vector4D {
             x: self.x + r.x,
             y: self.y + r.y,
             z: self.z + r.z,
-            w: self.w 
+            w: 0.0
         }
     }
 }
@@ -118,7 +117,7 @@ impl Sub<Vector4D> for Vector4D {
             x: self.x - r.x,
             y: self.y - r.y,
             z: self.z - r.z,
-            w: self.w 
+            w: 0.0 
         }
     }
 }
@@ -132,7 +131,7 @@ impl Neg for Vector4D {
             x: - self.x,
             y: - self.y,
             z: - self.z,
-            w: self.w,
+            w:  0.0
         }
     }
 }

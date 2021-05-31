@@ -87,7 +87,7 @@ fn test_draw_clock() {
 
     let radius = 3.0 / 8.0 * WIDTH; 
 
-    let mut hand = Vector4D::new_point(0.0, 0.0, 1.0);
+    let hand = Vector4D::new_point(0.0, 0.0, 1.0);
 
     let mut canvas = Canvas::new(WIDTH as usize, WIDTH as usize);
 

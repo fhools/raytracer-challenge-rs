@@ -100,3 +100,13 @@ fn vector_crossproduct() {
     assert!(f64_eq(wxv.y, -2.0));
     assert!(f64_eq(wxv.z, 1.0));
 }
+
+
+#[test]
+fn vector_dot() {
+    let v = Vector4D::new_vector(1.0, 2.0, 3.0);
+    let w = Vector4D::new_vector(2.0, 3.0, 4.0);
+    let d = v.dot(w);
+    assert_f64_eq!(d, 20.0)
+}
+

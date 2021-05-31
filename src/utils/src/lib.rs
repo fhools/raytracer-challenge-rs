@@ -1,3 +1,4 @@
+
 #[macro_export]
 macro_rules! assert_f64_eq {
     ($left:expr , $right:expr) => ({
@@ -16,3 +17,16 @@ pub fn f64_eq(f1: f64, f2: f64) -> bool {
     (f1 - f2).abs() < EPISLON
 }
 
+
+#[macro_export]
+macro_rules! assert_vector4d_eq {
+    ($left:expr , $right:expr) => ({
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !left_val.eq(right_val) {
+                    panic!("left != right. (left: {:?}, right: {:?}", *left_val, *right_val);
+                }
+            }
+        }
+    })
+}
