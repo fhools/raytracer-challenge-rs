@@ -1,6 +1,6 @@
 use utils::*;
 use super::Vector4D;
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone, Copy)]
 pub struct Matrix4x4 {
     pub m: [[f64;4]; 4]
 }

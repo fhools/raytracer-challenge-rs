@@ -50,11 +50,19 @@ impl Vector4D {
     pub fn normalize(&mut self) {
         let magnitude= self.norm();
         self.x = self.x / magnitude; 
-        self.y = self.x / magnitude; 
-        self.z = self.x / magnitude; 
-        self.w = self.x / magnitude; 
+        self.y = self.y / magnitude; 
+        self.z = self.z / magnitude; 
     }
 
+    pub fn normalized(&self) -> Vector4D {
+        let magnitude= self.norm();
+        let mut n = *self;
+
+        n.x = self.x / magnitude; 
+        n.y = self.y / magnitude; 
+        n.z = self.z / magnitude; 
+        n
+    }
     pub fn dot(&self, other: Vector4D) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }

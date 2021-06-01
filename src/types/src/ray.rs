@@ -1,5 +1,6 @@
 use utils::*;
 use crate::Vector4D;
+use crate::Matrix4x4;
 use crate::Intersectable;
 use crate::Intersection;
 #[derive(Debug, Copy, Clone)]
@@ -31,6 +32,14 @@ impl Ray {
 
     pub fn intersect<S: Intersectable>(&self, shape: &S) -> Vec<Intersection> {
         shape.intersect(self)
+    }
+
+
+    pub fn transform(&self, m: &Matrix4x4) -> Ray {
+        Ray {
+            origin: m.mul_vector4d(&self.origin),
+            direction: m.mul_vector4d(&self.direction)
+        }
     }
 }
 

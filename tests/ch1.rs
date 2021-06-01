@@ -80,8 +80,17 @@ fn vector_negation() {
 
 #[test]
 fn vector_norm() {
-    let v = Vector4D::new(2.0, 2.0, 2.0, 0.0);
+    let v = Vector4D::new_vector(2.0, 2.0, 2.0);
     assert_eq!(v.norm(), ((4.0 + 4.0 + 4.0) as f64).sqrt());
+}
+
+#[test]
+fn vector_normalized() {
+    let v = Vector4D::new_vector(0.0, 3.0, 0.0);
+    let nv = v.normalized();
+    assert_f64_eq!(nv.x, 0.0);
+    assert_f64_eq!(nv.y, 1.0);
+    assert_f64_eq!(nv.z, 0.0);
 }
 
 #[test]
