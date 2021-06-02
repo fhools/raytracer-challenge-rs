@@ -184,11 +184,12 @@ fn test_ray_intersect_scaled_sphere() {
 
 
 #[test]
+#[ignore = "slow test"]
 fn test_raytrace_sphere() {
     let ray_origin = Vector4D::new_point(0.0, 0.0, -5.0);
     let wall_z = 10.0;
     let wall_size = 7.0;
-    let canvas_width_pixels = 100.0;
+    let canvas_width_pixels = 400.0;
     let pixel_size = wall_size / canvas_width_pixels;
     let half = wall_size / 2.0;
     let mut canvas = Canvas::new(canvas_width_pixels as usize, canvas_width_pixels as usize);
@@ -211,4 +212,36 @@ fn test_raytrace_sphere() {
         }
     }
     canvas.write_ppm("ch5.ppm").unwrap();
+}
+
+#[test]
+#[ignore = "slow test"]
+fn test_raytrace_sphere_scaled() {
+    let ray_origin = Vector4D::new_point(0.0, 0.0, -5.0);
+    let wall_z = 10.0;
+    let wall_size = 7.0;
+    let canvas_width_pixels = 400.0;
+    let pixel_size = wall_size / canvas_width_pixels;
+    let half = wall_size / 2.0;
+    let mut canvas = Canvas::new(canvas_width_pixels as usize, canvas_width_pixels as usize);
+    let color = Color::new(1.0, 0.0, 0.0);
+    let mut shape = Sphere::new();
+    shape.set_transform(Matrix4x4::scaling(1.0, 0.5, 1.0));
+
+    for y in 0..(canvas_width_pixels as usize  - 1) {
+        let world_y = half - pixel_size * (y as f64);
+        for x in 0..(canvas_width_pixels as usize - 1) {
+            let world_x = -half + pixel_size * (x as f64);
+            let pos = Vector4D::new_point(world_x, world_y, wall_z);
+            let ray = Ray::new(ray_origin, (pos - ray_origin).normalized());
+            let xs = ray.intersect(&shape);
+            match hit(&xs) {
+                Some(_) => {
+                    canvas.set_pixel(x, y, &color);
+                },
+                None => {}
+            }
+        }
+    }
+    canvas.write_ppm("ch5_sphere.ppm").unwrap();
 }

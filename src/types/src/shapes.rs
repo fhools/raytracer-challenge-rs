@@ -12,7 +12,8 @@ impl Shape {
     pub fn eq(&self, other: Shape) -> bool {
         match *self {
             Shape::Sphere(ref s) => {
-                (s as &dyn Intersectable).eq(other)
+
+                s.eq(other)
             }
         }
     }
@@ -44,6 +45,7 @@ pub trait Intersectable {
     fn intersect(&self, ray: &Ray) -> Intersections;
     fn eq(&self, other: Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
+    fn normal_at(&self, p: Vector4D) -> Vector4D;
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -95,6 +97,12 @@ impl Intersectable for Sphere {
     
     fn set_transform(&mut self, m: Matrix4x4) {
         self.transform = m;
+    }
+
+    fn normal_at(&self, p: Vector4D) -> Vector4D {
+        let mut v = p;
+        v.w = 0.0;
+        v
     }
 }
 
