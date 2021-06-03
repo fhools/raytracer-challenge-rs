@@ -2,6 +2,7 @@ use utils::*;
 use crate::Vector4D;
 use crate::Matrix4x4;
 use crate::Ray;
+use crate::Material;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Shape {
@@ -12,20 +13,17 @@ impl Shape {
     pub fn eq(&self, other: Shape) -> bool {
         match *self {
             Shape::Sphere(ref s) => {
-
                 s.eq(other)
             }
         }
     }
 }
 
-
 #[derive(Debug,  Clone)]
 pub struct Intersection {
     pub obj: Box<Shape>,
     pub t: f64
 }
-
 
 pub type Intersections = Vec<Intersection>;
 
@@ -46,13 +44,15 @@ pub trait Intersectable {
     fn eq(&self, other: Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
     fn normal_at(&self, p: Vector4D) -> Vector4D;
+    fn get_material(&self) -> Material ;
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct Sphere {
     pub origin: Vector4D,
     pub radius: f64,
-    pub transform: Matrix4x4
+    pub transform: Matrix4x4,
+    pub material: Material,
 }
 
 impl Intersectable for Sphere {
@@ -99,10 +99,18 @@ impl Intersectable for Sphere {
         self.transform = m;
     }
 
-    fn normal_at(&self, p: Vector4D) -> Vector4D {
-        let mut v = p;
-        v.w = 0.0;
-        v
+    fn normal_at(&self, world_p: Vector4D) -> Vector4D {
+        let obj_point = self.transform.inverse().mul_vector4d(&world_p);
+        let obj_normal = obj_point - Vector4D::new_point(0.0, 0.0, 0.0);
+        let world_normal = self.transform.inverse().transpose().mul_vector4d(&obj_normal);
+        let mut n = world_normal.normalized();
+        n.w = 0.0;
+        println!("normal_at: {:?}", n);
+        n
+    }
+   
+    fn get_material(&self) -> Material {
+        self.material.clone()
     }
 }
 
@@ -111,7 +119,8 @@ impl Sphere {
         Sphere {
             origin: Vector4D::new_point(0.0, 0.0, 0.0),
             radius: 1.0,
-            transform: Matrix4x4::new()
+            transform: Matrix4x4::new(),
+            material: Default::default()
         }
     }
 }

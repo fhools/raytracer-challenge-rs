@@ -144,4 +144,6 @@ impl Neg for Vector4D {
     }
 }
 
-
+pub fn reflect(input: Vector4D, normal: Vector4D) -> Vector4D {
+    input - 2.0 * input.dot(normal) * normal
+}

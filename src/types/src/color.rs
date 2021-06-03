@@ -21,7 +21,11 @@ impl Color {
 
 impl Default for Color {
     fn default() -> Self {
-        Color::new(0.0, 0.0, 0.0)
+        Color {
+            red: Default::default(),
+            green: Default::default(),
+            blue: Default::default()
+        }
     }
 }
 // color addition

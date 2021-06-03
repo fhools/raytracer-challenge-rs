@@ -12,3 +12,6 @@ pub use ray::*;
 
 mod shapes;
 pub use shapes::*;
+
+mod material;
+pub use material::*;
