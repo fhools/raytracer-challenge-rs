@@ -1,5 +1,7 @@
 use std::default::Default;
 use std::ops::{Add, Mul, Sub};
+use std::cmp::PartialEq;
+use utils::f64_eq;
 
 // Values are in the range 0.0 - 1.0
 #[derive(Debug, Copy, Clone)]
@@ -15,6 +17,14 @@ impl Color {
             red,
             green,
             blue
+        }
+    }
+
+    pub fn BLACK() -> Color {
+        Color {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0
         }
     }
 }
@@ -73,6 +83,15 @@ impl Mul<Color> for f64 {
             green: self * other.green,
             blue: self * other.blue,
         }
+    }
+}
+
+
+impl PartialEq<Color> for Color {
+    fn eq(&self, other: &Color) -> bool {
+        f64_eq(self.red, other.red) &&
+        f64_eq(self.green, other.green) && 
+        f64_eq(self.blue, other.blue) 
     }
 }
 

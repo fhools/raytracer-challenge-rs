@@ -30,3 +30,16 @@ macro_rules! assert_vector4d_eq {
         }
     })
 }
+
+#[macro_export]
+macro_rules! assert_color_eq {
+    ($left:expr , $right:expr) => ({
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if !left_val.eq(right_val) {
+                    panic!("left != right. (left: {:?}, right: {:?}", *left_val, *right_val);
+                }
+            }
+        }
+    })
+}

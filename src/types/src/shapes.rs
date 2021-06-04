@@ -44,7 +44,8 @@ pub trait Intersectable {
     fn eq(&self, other: Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
     fn normal_at(&self, p: Vector4D) -> Vector4D;
-    fn get_material(&self) -> Material ;
+    fn get_material(&self) -> Material;
+    fn set_material(&mut self, material: Material);
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -111,6 +112,10 @@ impl Intersectable for Sphere {
    
     fn get_material(&self) -> Material {
         self.material.clone()
+    }
+
+    fn set_material(&mut self, mat: Material) {
+        self.material = mat;
     }
 }
 

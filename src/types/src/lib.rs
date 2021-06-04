@@ -15,3 +15,6 @@ pub use shapes::*;
 
 mod material;
 pub use material::*;
+
+mod lights;
+pub use lights::*;
