@@ -14,8 +14,10 @@ fn ray_new() {
 fn ray_at_t() {
     let r = Ray::new(Vector4D::new_point(1.0, 2.0, 3.0), 
                      Vector4D::new_vector(1.0, 2.0, 3.0));
-    assert_vector4d_eq!(r.at_t(2.0), r.origin() + Vector4D::new_vector(2.0, 4.0, 6.0));
-    assert_vector4d_eq!(r.at_t(-1.0), r.origin() - Vector4D::new_vector(1.0, 2.0, 3.0));
+    let mut p = r.origin() + Vector4D::new_vector(2.0, 4.0, 6.0);
+    assert_vector4d_eq!(r.at_t(2.0), p);
+    p =r.origin() - Vector4D::new_vector(1.0, 2.0, 3.0); 
+    assert_vector4d_eq!(r.at_t(-1.0), p);
 }
 
 

@@ -4,7 +4,7 @@ use crate::Intersectable;
 use crate::Intersection;
 use crate::Intersections;
 use crate::World;
-
+use crate::Shape;
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
     pub origin: Vector4D,
@@ -28,7 +28,8 @@ impl Ray {
     }
 
     pub fn at_t(&self, t: f64) -> Vector4D {
-        self.origin + t * self.direction
+        let mut p =  self.origin + t * self.direction;
+        p
     }
 
 
@@ -40,6 +41,26 @@ impl Ray {
         world.intersect(self)
     }
 
+    pub fn prepare_computations(&self, intersection: &Intersection) -> Computation {
+        let p = self.at_t(intersection.t);
+        let eyev = -self.dir();
+        let normalv;
+        let obj;
+        match *intersection.obj {
+            Shape::Sphere(sph) => {
+                normalv = sph.normal_at(p);
+                obj = Shape::Sphere(sph);
+            }
+        }
+        Computation {
+            t: intersection.t,
+            obj: Box::new(obj),
+            point: p,
+            eyev: eyev,
+            normalv: normalv
+        }
+    }
+
     pub fn transform(&self, m: &Matrix4x4) -> Ray {
         Ray {
             origin: m.mul_vector4d(&self.origin),
@@ -48,5 +69,11 @@ impl Ray {
     }
 }
 
-
+pub struct Computation {
+    pub t: f64,
+    pub obj: Box<Shape>,
+    pub point: Vector4D,
+    pub eyev: Vector4D,
+    pub normalv: Vector4D
+}
 
