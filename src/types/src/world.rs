@@ -2,6 +2,7 @@ use crate::LightSource;
 use crate::Sphere;
 use crate::Matrix4x4;
 use crate::Shape;
+use crate::Intersection;
 use crate::Intersections;
 use crate::Intersectable;
 use crate::Material;
@@ -31,6 +32,7 @@ impl World {
             }
         }
         vs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+        vs = vs.iter().filter(|a| a.t >= 0.0).cloned().collect::<Vec<Intersection>>();
         vs
     }
 }
@@ -46,6 +48,7 @@ impl Default for World {
 
         w.objects.push(Shape::Sphere(s1));
         let mut s2 = Sphere::new();
+        //s2.set_material(mat_s1);
         s2.set_transform(Matrix4x4::scaling(0.5, 0.5, 0.5));
         w.objects.push(Shape::Sphere(s2));
         w

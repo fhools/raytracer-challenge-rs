@@ -66,9 +66,7 @@ impl Intersectable for Sphere {
         let b = 2.0 * ray.dir().dot(sphere_to_ray);
         let c = sphere_to_ray.dot(sphere_to_ray) - 1.0;
 
-        println!("a: {}, b: {}, c: {}", a, b, c);
         let discriminant = b*b - 4.0 * a * c;
-        println!("discriminant: {}", discriminant);
         if discriminant < 0.0 {
             return vec![];
         }
@@ -103,7 +101,6 @@ impl Intersectable for Sphere {
         let world_normal = self.transform.inverse().transpose().mul_vector4d(&obj_normal);
         let mut n = world_normal.normalized();
         n.w = 0.0;
-        println!("normal_at: {:?}", n);
         n
     }
    
