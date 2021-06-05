@@ -110,5 +110,5 @@ fn test_draw_clock() {
         canvas.set_pixel(final_hand.x as usize, final_hand.z as usize + 1,&Color::new(1.0, 0.0, 0.0));
     }
 
-    canvas.write_ppm("clock.ppm");
+    canvas.write_ppm("clock.ppm").unwrap();
 }

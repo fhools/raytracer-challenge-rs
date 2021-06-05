@@ -18,3 +18,6 @@ pub use material::*;
 
 mod lights;
 pub use lights::*;
+
+mod world;
+pub use world::*;

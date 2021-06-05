@@ -27,14 +27,14 @@ pub fn lighting(material: Material,
     println!("lightv: {:?}", lightv);
     let ambient = effective_color * material.ambient;
 
-    let mut light_dot_normal = lightv.dot(normalv);
+    let light_dot_normal = lightv.dot(normalv);
     println!("light_dot_normal: {:?}", light_dot_normal);
     
-    let mut diffuse : Color = Default::default(); 
-    let mut specular : Color = Default::default(); 
+    let diffuse; 
+    let specular;
     if light_dot_normal < 0.0 {
-        diffuse = Color::BLACK();
-        specular = Color::BLACK();
+        diffuse = Color::black();
+        specular = Color::black();
     } else {
         diffuse = effective_color * material.diffuse * light_dot_normal;
         println!("diffuse: {:?}", diffuse);
@@ -43,7 +43,7 @@ pub fn lighting(material: Material,
         let reflect_dot_eye = reflectv.dot(eyev);
         println!("reflect_dot_eye: {:?}", reflect_dot_eye);
         if reflect_dot_eye <= 0.0 {
-            specular = Color::BLACK();
+            specular = Color::black();
         } else {
             let factor = reflect_dot_eye.powf(material.shininess);
             specular = light.intensity * material.specular * factor;

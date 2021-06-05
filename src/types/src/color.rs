@@ -20,7 +20,7 @@ impl Color {
         }
     }
 
-    pub fn BLACK() -> Color {
+    pub fn black() -> Color {
         Color {
             red: 0.0,
             green: 0.0,

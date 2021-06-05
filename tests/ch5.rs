@@ -78,7 +78,6 @@ fn intersection_new() {
         Shape::Sphere(ref sphere) => {
             assert!(sphere.eq(s));
         },
-        _ => { panic!("not equal to sphere s"); }
     }
     assert_f64_eq!(intersection.t, 3.5);
 }

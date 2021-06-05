@@ -1,5 +1,4 @@
 use std::ops::{Add, Sub, Mul, Neg, Div};
-use std::cmp::PartialEq;
 use utils::*;
 
 #[derive(Debug, Copy, Clone)]

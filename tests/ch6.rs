@@ -24,7 +24,7 @@ fn sohere_translated_normal_at() {
 }
 
 #[test]
-fn sphere_tranformed__normal_at() {
+fn sphere_tranformed_normal_at() {
     let mut s = Sphere::new();
     s.set_transform(MatrixChainer::new()
                     .then(Matrix4x4::rotate_z(PI/5.0))
@@ -135,9 +135,8 @@ fn lighting_behind_the_surface() {
     assert_eq!(result, Color::new(0.1, 0.1, 0.1));
 }
 
-
-
 #[test]
+#[ignore="slow test"]
 fn test_raytrace_sphere_lighting() {
     let ray_origin = Vector4D::new_point(0.0, 0.0, -5.0);
     let wall_z = 10.0;
@@ -174,6 +173,7 @@ fn test_raytrace_sphere_lighting() {
             }
         }
     }
+
     canvas.write_ppm("ch6.ppm").unwrap();
 }
 

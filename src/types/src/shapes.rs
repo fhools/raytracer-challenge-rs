@@ -90,9 +90,6 @@ impl Intersectable for Sphere {
                 self.origin.eq(&sphere.origin) &&
                 f64_eq(self.radius, sphere.radius) 
             },
-            _ => {
-                false
-            }
         }
     }
     
