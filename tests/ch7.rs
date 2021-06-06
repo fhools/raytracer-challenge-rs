@@ -3,6 +3,7 @@ use types::*;
 use utils::*;
 extern crate raytracer_challenge_rs;
 use raytracer_challenge_rs::Canvas;
+use raytracer_challenge_rs::render;
 #[test]
 fn test_default_world() {
     let world : World = Default::default();
@@ -255,6 +256,7 @@ fn ray_for_pixel_camera_transformed() {
 }
 
 #[test]
+#[ignore="render image"]
 fn test_raytrace_with_camera() {
     let mut canvas = Canvas::new(100, 80);
     let world: World = Default::default();
@@ -277,9 +279,10 @@ fn test_raytrace_with_camera() {
 }
 
 #[test]
+//#[ignore="render"]
 fn test_raytrace_with_camera_multiple_spheres() {
-    const WIDTH_PX: usize = 400;
-    const HEIGHT_PX: usize = 300;
+    const WIDTH_PX: usize = 100;
+    const HEIGHT_PX: usize = 80;;
     let mut canvas = Canvas::new(WIDTH_PX, HEIGHT_PX);
     let mut world: World = Default::default();
     world.objects.clear();
@@ -351,15 +354,5 @@ fn test_raytrace_with_camera_multiple_spheres() {
     let to = Vector4D::new_point(0.0, 1.0, 0.0);
     let up = Vector4D::new_vector(0.0, 1.0, 0.0);
     c.transform = view_transformation(from, to, up); 
-    fn render(camera: &Camera, world: &World, canvas: &mut Canvas) {
-        for y in 0..(camera.vsize_px - 1) {
-            for x in 0..(camera.hsize_px - 1) {
-                let ray = ray_for_pixel(&camera, x, y); 
-                let color = color_at(&world, ray);
-                canvas.set_pixel(x, y, &color);
-            }
-        }
-        canvas.write_ppm("ch7_multi.ppm").unwrap();
-    }
     render(&c, &world, &mut canvas);
 }

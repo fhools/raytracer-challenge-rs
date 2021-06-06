@@ -9,6 +9,7 @@ use crate::Material;
 use crate::Color;
 use crate::Ray;
 use crate::Vector4D;
+use crate::hit;
 pub struct World {
     pub light_source: LightSource,
     pub objects: Vec<Shape>,
@@ -32,8 +33,25 @@ impl World {
             }
         }
         vs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
-        vs = vs.iter().filter(|a| a.t >= 0.0).cloned().collect::<Vec<Intersection>>();
+        // NOTE: Lets not filter here, we can use the hit() function to locate the first non
+        // negative hit.  
+        // vs = vs.iter().filter(|a| a.t >= 0.0).cloned().collect::<Vec<Intersection>>();
         vs
+    }
+
+    pub fn is_shadowed(&self, point: Vector4D) -> bool {
+        let mut to_light_vec = self.light_source.position - point;
+        let distance_to_light = to_light_vec.norm();
+        to_light_vec.normalize(); 
+        let ray_to_light = Ray::new(point, to_light_vec);
+        println!("ray to light: {:?}", ray_to_light);
+        let mut xs = ray_to_light.intersect_world(self);
+        println!("xs: {:?}", xs);
+        if let Some(a_xs) = hit(&xs) {
+            a_xs.t < distance_to_light
+        } else {
+            false
+        }
     }
 }
 

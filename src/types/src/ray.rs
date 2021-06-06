@@ -7,6 +7,8 @@ use crate::World;
 use crate::Shape;
 use crate::Color;
 use crate::lighting;
+use crate::hit;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
     pub origin: Vector4D,
@@ -63,13 +65,17 @@ impl Ray {
             inside = false;
         }
 
+        // Used during shadow computation, so that shadow ray doesn't intersect the point of
+        // intersection at object, we compute a point above the normal
+        let over_point = p + utils::EPSILON*normalv;
         ShadeComputation {
             t: intersection.t,
             obj: Box::new(obj),
             point: p,
             eyev: eyev,
             normalv: normalv,
-            inside: inside
+            inside: inside,
+            over_point: over_point
         }
     }
 
@@ -88,20 +94,20 @@ pub struct ShadeComputation {
     pub eyev: Vector4D,
     pub normalv: Vector4D,
     pub inside: bool,
+    pub over_point: Vector4D
 }
 
 pub fn shade_hit(world: &World, sc: &ShadeComputation) -> Color {
     let Shape::Sphere(s) = *sc.obj;
-    lighting(s.material, world.light_source, sc.point, sc.eyev, sc.normalv)
+    lighting(s.material, world.light_source, sc.over_point, sc.point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
 }
 
 pub fn color_at(world: &World, ray: Ray) -> Color {
     let xs = ray.intersect_world(world);
-    if xs.len() == 0 {
-        Color::black()
-    } else {
-        let intersect = &xs[0];
-        let sc = ray.prepare_computations(intersect);
+    if let Some(xs) = hit(&xs) {
+        let sc = ray.prepare_computations(&xs);
         shade_hit(world, &sc)
+    } else {
+        Color::black()
     }
 }

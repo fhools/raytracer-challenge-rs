@@ -20,7 +20,8 @@ impl LightSource {
 }
 
 pub fn lighting(material: Material, 
-                light: LightSource, point: Vector4D, eyev: Vector4D, normalv: Vector4D) -> Color {
+                light: LightSource, over_point: Vector4D,
+                point: Vector4D, eyev: Vector4D, normalv: Vector4D, shadow: bool) -> Color {
 
     let effective_color = material.color * light.intensity;
     let lightv = (light.position - point).normalized();
@@ -30,7 +31,7 @@ pub fn lighting(material: Material,
     
     let diffuse; 
     let specular;
-    if light_dot_normal < 0.0 {
+    if light_dot_normal < 0.0 || shadow {
         diffuse = Color::black();
         specular = Color::black();
     } else {
