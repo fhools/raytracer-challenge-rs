@@ -465,4 +465,21 @@ impl MatrixChainer {
        panic!("no operations on MatrixChainer");
     }
 }
-    
+   
+
+pub fn view_transformation(from: Vector4D, to: Vector4D, up: Vector4D) -> Matrix4x4 {
+    let forward = (to - from).normalized();
+    let left = forward.cross(up.normalized());
+    let true_up = left.cross(forward);
+    let mut orientation_m = Matrix4x4::new();
+    orientation_m.m[0][0] = left.x;
+    orientation_m.m[0][1] = left.y;
+    orientation_m.m[0][2] = left.z;
+    orientation_m.m[1][0] = true_up.x;
+    orientation_m.m[1][1] = true_up.y;
+    orientation_m.m[1][2] = true_up.z;
+    orientation_m.m[2][0] = -forward.x;
+    orientation_m.m[2][1] = -forward.y;
+    orientation_m.m[2][2] = -forward.z;
+    orientation_m.mul(&Matrix4x4::translation(-from.x, -from.y, -from.z))
+}

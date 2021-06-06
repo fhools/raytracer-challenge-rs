@@ -21,3 +21,6 @@ pub use lights::*;
 
 mod world;
 pub use world::*;
+
+mod camera;
+pub use camera::*;
