@@ -6,7 +6,8 @@ use crate::Material;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Shape {
-    Sphere(Sphere)
+    Sphere(Sphere),
+    TestShape(TestShape),
 }
 
 impl Shape {
@@ -14,6 +15,9 @@ impl Shape {
         match *self {
             Shape::Sphere(ref s) => {
                 s.eq(other)
+            },
+            Shape::TestShape(t) => {
+               t.eq(other) 
             }
         }
     }
@@ -43,9 +47,47 @@ pub trait Intersectable {
     fn intersect(&self, ray: &Ray) -> Intersections;
     fn eq(&self, other: Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
+    fn get_transform(&self) -> Matrix4x4;
     fn normal_at(&self, p: Vector4D) -> Vector4D;
     fn get_material(&self) -> Material;
     fn set_material(&mut self, material: Material);
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TestShape {
+}
+
+impl Intersectable for TestShape {
+    fn intersect(&self, ray: &Ray) -> Intersections {
+        vec![]
+    }
+    fn eq(&self, other: Shape) -> bool {
+        match other {
+            Shape::TestShape(_) => { true },
+            _ => { false }
+        }
+    }
+
+    fn set_transform(&mut self, m: Matrix4x4) {
+    }
+
+    fn get_transform(&self) -> Matrix4x4 {
+        Matrix4x4::new()
+    }
+
+    fn normal_at(&self, p: Vector4D) -> Vector4D {
+        let obj_point = self.get_transform().inverse().mul_vector4d(&p);
+        let obj_normal = obj_point - Vector4D::new_point(0.0, 0.0, 0.0);
+        let world_normal = self.get_transform().inverse().transpose().mul_vector4d(&obj_normal);
+        let mut n = world_normal.normalized();
+        n.w = 0.0;
+        n
+    }
+    fn get_material(&self) -> Material {
+        Default::default()
+    }
+    fn set_material(&mut self, material: Material) {
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -88,11 +130,16 @@ impl Intersectable for Sphere {
                 self.origin.eq(&sphere.origin) &&
                 f64_eq(self.radius, sphere.radius) 
             },
+            _ => { false }
         }
     }
     
     fn set_transform(&mut self, m: Matrix4x4) {
         self.transform = m;
+    }
+
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
     }
 
     fn normal_at(&self, world_p: Vector4D) -> Vector4D {

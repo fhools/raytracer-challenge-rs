@@ -132,17 +132,19 @@ fn color_at_nohits() {
 #[test]
 fn color_at_behind_ray() {
     let mut world: World = Default::default();
-    let Shape::Sphere(ref mut s1) = world.objects[0];
-    s1.material.ambient = 1.0;
-    let Shape::Sphere(ref mut s2) = world.objects[1];
-    s2.material.ambient = 1.0;
-    let innercolor = s2.material.color;
-    let r = Ray::new(Vector4D::new_point(0.0, 0.0, 0.75), Vector4D::new_vector(0.0, 0.0, -1.0));
-    let color = color_at(&world, r);
-    println!("### color: {:?} inner color: {:?}", color, innercolor);
-    assert_f64_eq!(color.red, innercolor.red);
-    assert_f64_eq!(color.green, innercolor.green);
-    assert_f64_eq!(color.blue, innercolor.blue);
+    if let Shape::Sphere(ref mut s1) = world.objects[0] {
+        s1.material.ambient = 1.0;
+        if let Shape::Sphere(ref mut s2) = world.objects[1] {
+            s2.material.ambient = 1.0;
+            let innercolor = s2.material.color;
+            let r = Ray::new(Vector4D::new_point(0.0, 0.0, 0.75), Vector4D::new_vector(0.0, 0.0, -1.0));
+            let color = color_at(&world, r);
+            println!("### color: {:?} inner color: {:?}", color, innercolor);
+            assert_f64_eq!(color.red, innercolor.red);
+            assert_f64_eq!(color.green, innercolor.green);
+            assert_f64_eq!(color.blue, innercolor.blue);
+        }
+    }
 }
 
 #[test]

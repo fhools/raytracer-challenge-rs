@@ -80,6 +80,7 @@ fn intersection_new() {
         Shape::Sphere(ref sphere) => {
             assert!(sphere.eq(s));
         },
+        _ => {} 
     }
     assert_f64_eq!(intersection.t, 3.5);
 }

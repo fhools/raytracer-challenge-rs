@@ -166,6 +166,8 @@ fn test_raytrace_sphere_lighting() {
                             let eye = -ray.direction;
                             let color = lighting(obj.get_material(), lightsrc, hit_point, hit_point, eye, normal, false);
                             canvas.set_pixel(x, y, &color);
+                        },
+                        Shape::TestShape(_) => {
                         }
                     }
                 },

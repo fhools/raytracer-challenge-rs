@@ -27,8 +27,11 @@ impl World {
         let mut vs : Intersections = vec![];
         for o in self.objects.iter() {
             match o {
-                Shape::Sphere(sph) => {
-                    vs.extend(ray.intersect(sph));
+                Shape::Sphere(s) => {
+                    vs.extend(ray.intersect(s));
+                },
+                Shape::TestShape(t) => {
+                    vs.extend(ray.intersect(t));
                 }
             }
         }

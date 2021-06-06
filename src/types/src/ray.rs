@@ -55,6 +55,10 @@ impl Ray {
             Shape::Sphere(sph) => {
                 normalv = sph.normal_at(p);
                 obj = Shape::Sphere(sph);
+            },
+            Shape::TestShape(t) => {
+                normalv = t.normal_at(p);
+                obj = Shape::TestShape(t);
             }
         }
 
@@ -98,8 +102,15 @@ pub struct ShadeComputation {
 }
 
 pub fn shade_hit(world: &World, sc: &ShadeComputation) -> Color {
-    let Shape::Sphere(s) = *sc.obj;
-    lighting(s.material, world.light_source, sc.over_point, sc.point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
+    let shape : &dyn Intersectable;
+    if let Shape::Sphere(ref s) = *sc.obj {
+        shape = s;
+    } else if let Shape::TestShape(ref t) = *sc.obj {
+        shape = t;
+    } else {
+        panic!("unreachable code, sc.object is not a known shape"); 
+    }
+    lighting(shape.get_material(), world.light_source, sc.over_point, sc.point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
 }
 
 pub fn color_at(world: &World, ray: Ray) -> Color {
