@@ -51,14 +51,14 @@ impl Ray {
         let mut normalv;
         let obj;
         let inside;
-        match *intersection.obj {
+        match &*intersection.obj {
             Shape::Sphere(sph) => {
                 normalv = sph.normal_at(p);
-                obj = Shape::Sphere(sph);
+                obj = Shape::Sphere(sph.clone());
             },
             Shape::TestShape(t) => {
                 normalv = t.normal_at(p);
-                obj = Shape::TestShape(t);
+                obj = Shape::TestShape(t.clone());
             }
         }
 

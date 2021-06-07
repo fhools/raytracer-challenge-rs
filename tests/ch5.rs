@@ -31,8 +31,8 @@ fn ray_intersect_sphere() {
     assert_eq!(intersections.len(), 2);
     assert_f64_eq!(intersections[0].t, 4.0);
     assert_f64_eq!(intersections[1].t, 6.0);
-    assert_eq!(intersections[0].obj.eq(Shape::Sphere(s)), true);
-    assert_eq!(intersections[1].obj.eq(Shape::Sphere(s)), true);
+    assert_eq!(intersections[0].obj.eq(&Shape::Sphere(s.clone())), true);
+    assert_eq!(intersections[1].obj.eq(&Shape::Sphere(s.clone())), true);
 }
 
 #[test]
@@ -45,8 +45,8 @@ fn ray_intersect_sphere_tangent() {
     assert_eq!(intersections.len(), 2);
     assert_f64_eq!(intersections[0].t, 5.0);
     assert_f64_eq!(intersections[1].t, 5.0);
-    assert_eq!(intersections[0].obj.eq(Shape::Sphere(s)), true);
-    assert_eq!(intersections[1].obj.eq(Shape::Sphere(s)), true);
+    assert_eq!(intersections[0].obj.eq(&Shape::Sphere(s.clone())), true);
+    assert_eq!(intersections[1].obj.eq(&Shape::Sphere(s.clone())), true);
 }
 
 #[test]
@@ -73,12 +73,12 @@ fn ray_intersect_sphere_ray_inside() {
 fn intersection_new() {
     let s = Shape::Sphere(Sphere::new());
     let intersection = Intersection {
-        obj: Box::new(s),
+        obj: Box::new(s.clone()),
         t: 3.5
     };
     match *intersection.obj {
         Shape::Sphere(ref sphere) => {
-            assert!(sphere.eq(s));
+            assert!(sphere.eq(&s));
         },
         _ => {} 
     }
@@ -89,17 +89,17 @@ fn intersection_new() {
 fn test_hit() {
     let s = Sphere::new();
     let i1 = Intersection {
-        obj: Box::new(Shape::Sphere(s)),
+        obj: Box::new(Shape::Sphere(s.clone())),
         t: 1.0
     };
     let i2 = Intersection {
-        obj: Box::new(Shape::Sphere(s)),
+        obj: Box::new(Shape::Sphere(s.clone())),
         t: 2.0
     };
 
     let intersections : Intersections = vec![i2, i1];
     let i = hit(&intersections).unwrap();
-    assert!(i.obj.eq(Shape::Sphere(s)));
+    assert!(i.obj.eq(&Shape::Sphere(s)));
     assert_f64_eq!(i.t, 1.0);
 }
 
@@ -107,17 +107,17 @@ fn test_hit() {
 fn test_hit_negative() {
     let s = Sphere::new();
     let i1 = Intersection {
-        obj: Box::new(Shape::Sphere(s)),
+        obj: Box::new(Shape::Sphere(s.clone())),
         t: -1.0
     };
     let i2 = Intersection {
-        obj: Box::new(Shape::Sphere(s)),
+        obj: Box::new(Shape::Sphere(s.clone())),
         t: 1.0
     };
 
     let intersections : Intersections = vec![i2, i1];
     let i = hit(&intersections).unwrap();
-    assert!(i.obj.eq(Shape::Sphere(s)));
+    assert!(i.obj.eq(&Shape::Sphere(s)));
     assert_f64_eq!(i.t, 1.0);
 }
 
@@ -125,11 +125,11 @@ fn test_hit_negative() {
 fn test_hit_all_negative() {
     let s = Sphere::new();
     let i1 = Intersection {
-        obj: Box::new(Shape::Sphere(s)),
+        obj: Box::new(Shape::Sphere(s.clone())),
         t: -1.0
     };
     let i2 = Intersection {
-        obj: Box::new(Shape::Sphere(s)),
+        obj: Box::new(Shape::Sphere(s.clone())),
         t: -2.0
     };
 

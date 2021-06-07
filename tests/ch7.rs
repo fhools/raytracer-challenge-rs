@@ -32,7 +32,7 @@ fn test_prepare_computations() {
 
     let c = r.prepare_computations(&i);
     assert_f64_eq!(c.t, i.t);
-    assert!(i.obj.eq(*c.obj));
+    assert!(i.obj.eq(&*c.obj));
     assert_vector4d_eq!(c.eyev, Vector4D::new_vector(0.0, 0.0, -1.0));
     assert_vector4d_eq!(c.point, Vector4D::new_point(0.0, 0.0, -1.0));
     assert_vector4d_eq!(c.normalv, Vector4D::new_vector(0.0, 0.0, -1.0));
@@ -49,7 +49,7 @@ fn test_prepare_computations_inside_hit_false() {
 
     let c = r.prepare_computations(&i);
     assert_f64_eq!(c.t, i.t);
-    assert!(i.obj.eq(*c.obj));
+    assert!(i.obj.eq(&*c.obj));
     assert_vector4d_eq!(c.eyev, Vector4D::new_vector(0.0, 0.0, -1.0));
     assert_vector4d_eq!(c.point, Vector4D::new_point(0.0, 0.0, -1.0));
     assert_vector4d_eq!(c.normalv, Vector4D::new_vector(0.0, 0.0, -1.0));
@@ -67,7 +67,7 @@ fn test_prepare_computations_inside_hit_true() {
 
     let c = r.prepare_computations(&i);
     assert_f64_eq!(c.t, i.t);
-    assert!(i.obj.eq(*c.obj));
+    assert!(i.obj.eq(&*c.obj));
     assert_vector4d_eq!(c.eyev, Vector4D::new_vector(0.0, 0.0, -1.0));
     assert_vector4d_eq!(c.point, Vector4D::new_point(0.0, 0.0, 1.0));
     assert_vector4d_eq!(c.normalv, Vector4D::new_vector(0.0, 0.0, -1.0));
@@ -77,10 +77,10 @@ fn test_prepare_computations_inside_hit_true() {
 #[test]
 fn shade_intersection() {
     let w : World = Default::default();
-    let shape = w.objects[0]; 
+    let shape = &w.objects[0]; 
     let r = Ray::new(Vector4D::new_point(0.0, 0.0, -5.0), Vector4D::new_vector(0.0, 0.0, 1.0));
     let i = Intersection {
-                obj: Box::new(shape),
+                obj: Box::new(shape.clone()),
                 t: 4.0
     };
 
@@ -95,10 +95,10 @@ fn shade_intersection() {
 fn shade_intersection_inside() {
     let mut w : World = Default::default();
     w.light_source = LightSource::new(Color::new(1.0, 1.0, 1.0), Vector4D::new_point(0.0, 0.25, 0.0));
-    let shape = w.objects[1]; 
+    let shape = &w.objects[1]; 
     let r = Ray::new(Vector4D::new_point(0.0, 0.0, 0.0), Vector4D::new_vector(0.0, 0.0, 1.0));
     let i = Intersection {
-                obj: Box::new(shape),
+                obj: Box::new(shape.clone()),
                 t: 0.5
     };
 
@@ -294,7 +294,7 @@ fn test_raytrace_with_camera_multiple_spheres() {
     floor_obj.material.color = Color::new(1.0, 0.9, 0.9);
     floor_obj.material.specular = 0.0; 
 
-    world.objects.push(Shape::Sphere(floor_obj));
+    world.objects.push(Shape::Sphere(floor_obj.clone()));
 
     let mut left_wall_obj = Sphere::new();
     left_wall_obj.transform = MatrixChainer::new()

@@ -3,21 +3,22 @@ use crate::Vector4D;
 use crate::Matrix4x4;
 use crate::Ray;
 use crate::Material;
+use std::cell::Cell;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum Shape {
     Sphere(Sphere),
     TestShape(TestShape),
 }
 
 impl Shape {
-    pub fn eq(&self, other: Shape) -> bool {
+    pub fn eq(&self, other: &Shape) -> bool {
         match *self {
             Shape::Sphere(ref s) => {
-                s.eq(other)
+                s.eq(&other)
             },
             Shape::TestShape(t) => {
-               t.eq(other) 
+               t.eq(&other) 
             }
         }
     }
@@ -45,7 +46,7 @@ pub fn hit(xs: &Intersections) -> Option<Intersection> {
 
 pub trait Intersectable {
     fn intersect(&self, ray: &Ray) -> Intersections;
-    fn eq(&self, other: Shape) -> bool;
+    fn eq(&self, other: &Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
     fn get_transform(&self) -> Matrix4x4;
     fn normal_at(&self, p: Vector4D) -> Vector4D;
@@ -55,24 +56,27 @@ pub trait Intersectable {
 
 #[derive(Debug, Clone, Copy)]
 pub struct TestShape {
+   pub transform: Matrix4x4,
+   pub material: Material,
 }
 
 impl Intersectable for TestShape {
     fn intersect(&self, ray: &Ray) -> Intersections {
         vec![]
     }
-    fn eq(&self, other: Shape) -> bool {
-        match other {
-            Shape::TestShape(_) => { true },
+    fn eq(&self, other: &Shape) -> bool {
+        match *other {
+            Shape::TestShape(ref _t) => { true },
             _ => { false }
         }
     }
 
     fn set_transform(&mut self, m: Matrix4x4) {
+        self.transform = m;
     }
 
     fn get_transform(&self) -> Matrix4x4 {
-        Matrix4x4::new()
+        self.transform
     }
 
     fn normal_at(&self, p: Vector4D) -> Vector4D {
@@ -84,25 +88,38 @@ impl Intersectable for TestShape {
         n
     }
     fn get_material(&self) -> Material {
-        Default::default()
+        self.material
     }
     fn set_material(&mut self, material: Material) {
+        self.material = material;
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+impl TestShape {
+    pub fn new() -> TestShape {
+        TestShape {
+            material: Default::default(),
+            transform: Matrix4x4::new()
+        }
+    }
+}
+
+
+#[derive(Clone, Debug)]
 pub struct Sphere {
     pub origin: Vector4D,
     pub radius: f64,
     pub transform: Matrix4x4,
     pub material: Material,
+    saved_ray: Cell<Option<Ray>>
 }
 
 impl Intersectable for Sphere {
     fn intersect(&self, ray: &Ray) -> Vec<Intersection> {
         // Transform the ray via the inverse of the objects transform, same as tranforming unit
         // sphere to in front of the camera.
-        let ray = ray.transform(&self.transform.inverse());
+        let ray = ray.transform(&self.get_transform().inverse());
+        self.saved_ray.set(Some(ray));
         let sphere_to_ray = ray.origin() - self.origin;
         let a = ray.dir().dot(ray.dir());
         let b = 2.0 * ray.dir().dot(sphere_to_ray);
@@ -124,7 +141,7 @@ impl Intersectable for Sphere {
         intersections
     }
 
-    fn eq(&self, other: Shape) -> bool {
+    fn eq(&self, other: &Shape) -> bool {
         match other { 
             Shape::Sphere(ref sphere) => {
                 self.origin.eq(&sphere.origin) &&
@@ -166,7 +183,8 @@ impl Sphere {
             origin: Vector4D::new_point(0.0, 0.0, 0.0),
             radius: 1.0,
             transform: Matrix4x4::new(),
-            material: Default::default()
+            material: Default::default(),
+            saved_ray: Cell::new(None)
         }
     }
 }
