@@ -32,12 +32,12 @@ impl Ray {
     }
 
     pub fn at_t(&self, t: f64) -> Vector4D {
-        let mut p =  self.origin + t * self.direction;
+        let p =  self.origin + t * self.direction;
         p
     }
 
 
-    pub fn intersect<S: Intersectable>(&self, shape: &S) -> Vec<Intersection> {
+    pub fn intersect<S: Intersectable>(&self, shape: &S) -> Intersections {
         shape.intersect(self)
     }
 
@@ -59,6 +59,10 @@ impl Ray {
             Shape::TestShape(t) => {
                 normalv = t.normal_at(p);
                 obj = Shape::TestShape(t.clone());
+            }
+            Shape::Plane(plane) => {
+                normalv = plane.normal_at(p);
+                obj = Shape::Plane(plane.clone());
             }
         }
 
@@ -103,14 +107,18 @@ pub struct ShadeComputation {
 
 pub fn shade_hit(world: &World, sc: &ShadeComputation) -> Color {
     let shape : &dyn Intersectable;
-    if let Shape::Sphere(ref s) = *sc.obj {
-        shape = s;
-    } else if let Shape::TestShape(ref t) = *sc.obj {
-        shape = t;
-    } else {
-        panic!("unreachable code, sc.object is not a known shape"); 
+    match *sc.obj {
+        Shape::Sphere(ref s) => {
+            shape = s;
+        },
+        Shape::TestShape(ref t) => {
+            shape = t;
+        },
+        Shape::Plane(ref p) => {
+            shape =p;
+        }
     }
-    lighting(shape.get_material(), world.light_source, sc.over_point, sc.point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
+    lighting(shape.get_material(), world.light_source, sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
 }
 
 pub fn color_at(world: &World, ray: Ray) -> Color {

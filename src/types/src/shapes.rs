@@ -9,6 +9,7 @@ use std::cell::Cell;
 pub enum Shape {
     Sphere(Sphere),
     TestShape(TestShape),
+    Plane(Plane),
 }
 
 impl Shape {
@@ -17,8 +18,11 @@ impl Shape {
             Shape::Sphere(ref s) => {
                 s.eq(&other)
             },
-            Shape::TestShape(t) => {
+            Shape::TestShape(ref t) => {
                t.eq(&other) 
+            },
+            Shape::Plane(ref p) => {
+                p.eq(&other)
             }
         }
     }
@@ -49,19 +53,33 @@ pub trait Intersectable {
     fn eq(&self, other: &Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
     fn get_transform(&self) -> Matrix4x4;
-    fn normal_at(&self, p: Vector4D) -> Vector4D;
+    fn normal_at(&self, world_p: Vector4D) -> Vector4D {
+        let obj_point = self.get_transform().inverse().mul_vector4d(&world_p);
+        let obj_normal = self.normal_at_local(obj_point);
+        let world_normal = self.get_transform().inverse().transpose().mul_vector4d(&obj_normal);
+        let mut n = world_normal.normalized();
+        n.w = 0.0;
+        n
+    }
+    fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D;
     fn get_material(&self) -> Material;
     fn set_material(&mut self, material: Material);
+
+
+    fn saved_ray(&self) -> Option<Ray>;
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct TestShape {
    pub transform: Matrix4x4,
    pub material: Material,
+   saved_ray: Cell<Option<Ray>>
 }
 
 impl Intersectable for TestShape {
     fn intersect(&self, ray: &Ray) -> Intersections {
+        let ray = ray.transform(&self.get_transform().inverse());
+        self.saved_ray.set(Some(ray));
         vec![]
     }
     fn eq(&self, other: &Shape) -> bool {
@@ -79,13 +97,9 @@ impl Intersectable for TestShape {
         self.transform
     }
 
-    fn normal_at(&self, p: Vector4D) -> Vector4D {
-        let obj_point = self.get_transform().inverse().mul_vector4d(&p);
+    fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D {
         let obj_normal = obj_point - Vector4D::new_point(0.0, 0.0, 0.0);
-        let world_normal = self.get_transform().inverse().transpose().mul_vector4d(&obj_normal);
-        let mut n = world_normal.normalized();
-        n.w = 0.0;
-        n
+        obj_normal
     }
     fn get_material(&self) -> Material {
         self.material
@@ -93,13 +107,18 @@ impl Intersectable for TestShape {
     fn set_material(&mut self, material: Material) {
         self.material = material;
     }
+
+    fn saved_ray(&self) -> Option<Ray> {
+        self.saved_ray.get()
+    }
 }
 
 impl TestShape {
     pub fn new() -> TestShape {
         TestShape {
             material: Default::default(),
-            transform: Matrix4x4::new()
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None)
         }
     }
 }
@@ -111,6 +130,7 @@ pub struct Sphere {
     pub radius: f64,
     pub transform: Matrix4x4,
     pub material: Material,
+
     saved_ray: Cell<Option<Ray>>
 }
 
@@ -141,6 +161,11 @@ impl Intersectable for Sphere {
         intersections
     }
 
+
+    fn saved_ray(&self) -> Option<Ray> {
+        self.saved_ray.get()
+    }
+
     fn eq(&self, other: &Shape) -> bool {
         match other { 
             Shape::Sphere(ref sphere) => {
@@ -159,13 +184,10 @@ impl Intersectable for Sphere {
         self.transform
     }
 
-    fn normal_at(&self, world_p: Vector4D) -> Vector4D {
-        let obj_point = self.transform.inverse().mul_vector4d(&world_p);
+
+    fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D {
         let obj_normal = obj_point - Vector4D::new_point(0.0, 0.0, 0.0);
-        let world_normal = self.transform.inverse().transpose().mul_vector4d(&obj_normal);
-        let mut n = world_normal.normalized();
-        n.w = 0.0;
-        n
+        obj_normal
     }
    
     fn get_material(&self) -> Material {
@@ -189,3 +211,62 @@ impl Sphere {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Plane {
+    pub transform: Matrix4x4,
+    pub material: Material,
+    saved_ray: Cell<Option<Ray>>
+}
+
+impl Intersectable for Plane {
+    fn intersect(&self, ray: &Ray) -> Intersections {
+        let ray = ray.transform(&self.get_transform().inverse());
+        self.saved_ray.set(Some(ray));
+        if ray.direction.y.abs() < 0.00001 {
+            vec![]
+        } else {
+            let t = -ray.origin.y / ray.direction.y;
+            vec![Intersection {
+                obj: Box::new(Shape::Plane((*self).clone())),
+                t: t }]
+        }
+    }
+    fn eq(&self, other: &Shape) -> bool {
+        match other {
+            Shape::Plane(ref plane) => {
+                self.get_transform().eq(&plane.get_transform())
+            },
+            _ => { false }
+        }
+    }
+
+    fn set_transform(&mut self, m: Matrix4x4) {
+        self.transform = m
+    }
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
+    }
+    fn normal_at_local(&self, _obj_point: Vector4D) -> Vector4D {
+        Vector4D::new_vector(0.0, 1.0, 0.0)
+    }
+    fn get_material(&self) -> Material {
+        self.material
+    }
+    fn set_material(&mut self, material: Material) {
+        self.material = material;
+    }
+
+    fn saved_ray(&self) -> Option<Ray> {
+        self.saved_ray.get()
+    }
+}
+
+impl Plane {
+    pub fn new() -> Plane {
+        Plane {
+            material: Default::default(),
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None),
+        }
+    }
+}

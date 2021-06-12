@@ -2,7 +2,6 @@ use crate::LightSource;
 use crate::Sphere;
 use crate::Matrix4x4;
 use crate::Shape;
-use crate::Intersection;
 use crate::Intersections;
 use crate::Intersectable;
 use crate::Material;
@@ -32,7 +31,11 @@ impl World {
                 },
                 Shape::TestShape(t) => {
                     vs.extend(ray.intersect(t));
+                },
+                Shape::Plane(p) => {
+                    vs.extend(ray.intersect(p));
                 }
+
             }
         }
         vs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
@@ -47,9 +50,7 @@ impl World {
         let distance_to_light = to_light_vec.norm();
         to_light_vec.normalize(); 
         let ray_to_light = Ray::new(point, to_light_vec);
-        println!("ray to light: {:?}", ray_to_light);
-        let mut xs = ray_to_light.intersect_world(self);
-        println!("xs: {:?}", xs);
+        let xs = ray_to_light.intersect_world(self);
         if let Some(a_xs) = hit(&xs) {
             a_xs.t < distance_to_light
         } else {

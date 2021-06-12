@@ -3,10 +3,12 @@ use types::*;
 use utils::*;
 extern crate raytracer_challenge_rs;
 use raytracer_challenge_rs::Canvas;
+
+#[allow(unused_imports)]
 use raytracer_challenge_rs::render;
 #[test]
 fn test_default_world() {
-    let world : World = Default::default();
+    let _world : World = Default::default();
 }
 
 #[test]
@@ -209,7 +211,7 @@ fn camera_new() {
     let hsize = 160;
     let vsize = 120;
     let field_of_view = PI/2.0;
-    let c = Camera::new(hsize, vsize, field_of_view);
+    let _c = Camera::new(hsize, vsize, field_of_view);
 }
 #[test]
 fn camera_aspect_hsize_gt_vsize() {
@@ -230,7 +232,7 @@ fn camera_aspect_vsize_gt_hsize() {
 }
 
 #[test]
-fn ray_for_pixel__center_canvas() {
+fn ray_for_pixel_center_canvas() {
     let c = Camera::new(201, 101, PI/2.0);
     let r = ray_for_pixel(&c, 100, 50);
     assert_vector4d_eq!(r.origin, Vector4D::new_point(0.0, 0.0, 0.0));
@@ -281,10 +283,10 @@ fn test_raytrace_with_camera() {
 }
 
 #[test]
-//#[ignore="render"]
+#[ignore="render"]
 fn test_raytrace_with_camera_multiple_spheres() {
     const WIDTH_PX: usize = 100;
-    const HEIGHT_PX: usize = 80;;
+    const HEIGHT_PX: usize = 80;
     let mut canvas = Canvas::new(WIDTH_PX, HEIGHT_PX);
     let mut world: World = Default::default();
     world.objects.clear();

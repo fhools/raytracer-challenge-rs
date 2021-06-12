@@ -28,14 +28,22 @@ impl Canvas {
     }
 
     pub fn set_pixel(&mut self, x: usize, y: usize, c: &Color) {
-        assert!(x < self.width);
-        assert!(y < self.height);
+        if x >= self.width  {
+            panic!("x: {} >= width: {}", x, self.width);
+        }
+        if y >= self.height {
+            panic!("y: {} >= height: {}", y, self.height);
+        }
         self.canvas[y][x] = *c;
     }
 
     pub fn get_pixel(&self, x: usize, y: usize) -> Color {
-        assert!(x < self.width);
-        assert!(y < self.height);
+        if x >= self.width  {
+            panic!("x: {} >= width: {}", x, self.width);
+        }
+        if y >= self.height {
+            panic!("y: {} >= height: {}", y, self.height);
+        }
         self.canvas[y][x]
     }
     

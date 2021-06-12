@@ -20,7 +20,7 @@ impl LightSource {
 }
 
 pub fn lighting(material: Material, 
-                light: LightSource, over_point: Vector4D,
+                light: LightSource, 
                 point: Vector4D, eyev: Vector4D, normalv: Vector4D, shadow: bool) -> Color {
 
     let effective_color = material.color * light.intensity;
