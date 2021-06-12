@@ -28,8 +28,8 @@ fn intersect_plane() {
 }
 
 #[test]
-//#[ignore="rendering"]
-fn test_raytrace_with_camera() {
+#[ignore="rendering"]
+fn test_raytrace_with_camera_floor() {
     const WIDTH: usize = 200;
     const HEIGHT: usize = 180;
     let mut canvas = Canvas::new(WIDTH, HEIGHT);
@@ -58,4 +58,43 @@ fn test_raytrace_with_camera() {
     }
     render(&c, &world, &mut canvas);
 }
-
+#[test]
+fn test_raytrace_with_camera_floor_and_wall() {
+    const WIDTH: usize = 200;
+    const HEIGHT: usize = 180;
+    let mut canvas = Canvas::new(WIDTH, HEIGHT);
+    let mut world: World = Default::default();
+    let mut plane = Plane::new();
+    let mut mat_p = Material::new(Color::new(0.5, 0.3, 0.0));
+    mat_p.diffuse = 0.7;
+    mat_p.specular = 0.1;
+    plane.set_material(mat_p);
+    plane.set_transform(Matrix4x4::translation(0.0, -2.0, 0.0));
+    world.objects.push(Shape::Plane(plane));
+    let mut wall= Plane::new();
+    let mut mat_p = Material::new(Color::new(0.5, 0.3, 0.2));
+    mat_p.diffuse = 0.7;
+    mat_p.specular = 0.1;
+    wall.set_material(mat_p);
+    wall.set_transform(MatrixChainer::new()
+                        .then(Matrix4x4::rotate_x(PI/2.0))
+                        .then(Matrix4x4::translation(0.0,0.0,5.0))
+                        .finish());
+    world.objects.push(Shape::Plane(wall));
+    let mut c = Camera::new(WIDTH, HEIGHT, PI/2.0);
+    let from = Vector4D::new_point(0.0, 2.0, -5.0);
+    let to = Vector4D::new_point(0.0, 0.0, 0.0);
+    let up = Vector4D::new_vector(0.0, 1.0, 0.0);
+    c.transform = view_transformation(from, to, up); 
+    fn render(camera: &Camera, world: &World, canvas: &mut Canvas) {
+        for y in 0..(camera.vsize_px - 1) {
+            for x in 0..(camera.hsize_px - 1) {
+                let ray = ray_for_pixel(&camera, x, y); 
+                let color = color_at(&world, ray);
+                canvas.set_pixel(x, y, &color);
+            }
+        }
+        canvas.write_ppm("ch9_wall.ppm").unwrap();
+    }
+    render(&c, &world, &mut canvas);
+}
