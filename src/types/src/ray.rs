@@ -118,7 +118,7 @@ pub fn shade_hit(world: &World, sc: &ShadeComputation) -> Color {
             shape =p;
         }
     }
-    lighting(shape.get_material(), world.light_source, sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
+    lighting(shape.get_material(), shape, world.light_source, sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
 }
 
 pub fn color_at(world: &World, ray: Ray) -> Color {

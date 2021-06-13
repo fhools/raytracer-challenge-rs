@@ -56,6 +56,13 @@ pub trait Intersectable {
     fn normal_at(&self, world_p: Vector4D) -> Vector4D {
         let obj_point = self.get_transform().inverse().mul_vector4d(&world_p);
         let obj_normal = self.normal_at_local(obj_point);
+
+        // The tranpose of the inverse will rescale the normal vectors to the correct proportions.
+        // Inverse then transpose of rotation component is a no-op, because transpose is the same
+        // as inverting for an orthogonal matrix.
+        // Transpose of the pure-scale is a no-op since pure-scale is on the diagnoals of a matrix.
+        // So we are left with just the inverting, which does the rescaling of the normal like we
+        // want.
         let world_normal = self.get_transform().inverse().transpose().mul_vector4d(&obj_normal);
         let mut n = world_normal.normalized();
         n.w = 0.0;
@@ -102,10 +109,10 @@ impl Intersectable for TestShape {
         obj_normal
     }
     fn get_material(&self) -> Material {
-        self.material
+        self.material.clone()
     }
     fn set_material(&mut self, material: Material) {
-        self.material = material;
+        self.material = material.clone();
     }
 
     fn saved_ray(&self) -> Option<Ray> {
@@ -250,10 +257,10 @@ impl Intersectable for Plane {
         Vector4D::new_vector(0.0, 1.0, 0.0)
     }
     fn get_material(&self) -> Material {
-        self.material
+        self.material.clone()
     }
     fn set_material(&mut self, material: Material) {
-        self.material = material;
+        self.material = material.clone();
     }
 
     fn saved_ray(&self) -> Option<Ray> {

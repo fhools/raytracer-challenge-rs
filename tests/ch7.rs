@@ -305,7 +305,7 @@ fn test_raytrace_with_camera_multiple_spheres() {
         .then(Matrix4x4::rotate_y(-PI/4.0))
         .then(Matrix4x4::translation(0.0, 0.0, 5.0))
         .finish();
-    left_wall_obj.material = floor_obj.material;
+    left_wall_obj.material = floor_obj.material.clone();
     world.objects.push(Shape::Sphere(left_wall_obj));
 
     let mut right_wall_obj = Sphere::new();

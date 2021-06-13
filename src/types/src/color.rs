@@ -21,12 +21,17 @@ impl Color {
     }
 
     pub fn black() -> Color {
-        Color {
-            red: 0.0,
-            green: 0.0,
-            blue: 0.0
-        }
+        Color { red: 0.0, green: 0.0, blue: 0.0 }
     }
+
+    pub fn white() -> Color {
+        Color { red: 1.0, green: 1.0, blue: 1.0 }
+    }
+
+    pub fn blue() -> Color {
+        Color { red: 0.0, green: 0.0, blue: 1.0 }
+    }
+
 }
 
 impl Default for Color {

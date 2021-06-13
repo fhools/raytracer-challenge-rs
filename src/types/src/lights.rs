@@ -2,7 +2,9 @@ use crate::Color;
 use crate::Vector4D;
 use crate::reflect;
 use crate::Material;
-
+use crate::Intersectable;
+use crate::Pattern;
+use crate::Patternable;
 #[derive(Copy,Clone, Debug)]
 pub struct LightSource {
     pub intensity: Color,
@@ -20,10 +22,23 @@ impl LightSource {
 }
 
 pub fn lighting(material: Material, 
+                object: &dyn Intersectable,
                 light: LightSource, 
                 point: Vector4D, eyev: Vector4D, normalv: Vector4D, shadow: bool) -> Color {
 
-    let effective_color = material.color * light.intensity;
+    
+    let effective_color = match material.pattern {
+        None => { material.color },
+        Some(pattern) =>  {  match *pattern {
+            Pattern::StripePattern(stripe_pattern) => {
+                stripe_pattern.pattern_at_object(object, point) 
+            },
+            Pattern::RingPattern(ring_pattern) => {
+                ring_pattern.pattern_at_object(object, point)
+            }
+        }
+        }
+    } * light.intensity;
     let lightv = (light.position - point).normalized();
     let ambient = effective_color * material.ambient;
 

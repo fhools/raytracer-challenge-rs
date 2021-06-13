@@ -24,3 +24,6 @@ pub use world::*;
 
 mod camera;
 pub use camera::*;
+
+mod patterns;
+pub use patterns::*;

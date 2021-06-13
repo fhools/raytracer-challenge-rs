@@ -59,6 +59,7 @@ fn test_raytrace_with_camera_floor() {
     render(&c, &world, &mut canvas);
 }
 #[test]
+#[ignore="render"]
 fn test_raytrace_with_camera_floor_and_wall() {
     const WIDTH: usize = 200;
     const HEIGHT: usize = 180;
@@ -98,3 +99,4 @@ fn test_raytrace_with_camera_floor_and_wall() {
     }
     render(&c, &world, &mut canvas);
 }
+

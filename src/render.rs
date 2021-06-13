@@ -8,5 +8,4 @@ pub fn render(camera: &Camera, world: &World, canvas: &mut Canvas) {
             canvas.set_pixel(x, y, &color);
         }
     }
-    canvas.write_ppm("ch7_multi.ppm").unwrap();
 }
