@@ -28,9 +28,18 @@ impl Color {
         Color { red: 1.0, green: 1.0, blue: 1.0 }
     }
 
+    pub fn red() -> Color {
+        Color { red: 1.0, green: 0.0, blue: 0.0 }
+    }
+
+    pub fn green() -> Color {
+        Color { red: 0.0, green: 1.0, blue: 0.0 }
+    }
+
     pub fn blue() -> Color {
         Color { red: 0.0, green: 0.0, blue: 1.0 }
     }
+
 
 }
 

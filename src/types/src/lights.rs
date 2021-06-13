@@ -30,11 +30,17 @@ pub fn lighting(material: Material,
     let effective_color = match material.pattern {
         None => { material.color },
         Some(pattern) =>  {  match *pattern {
-            Pattern::StripePattern(stripe_pattern) => {
-                stripe_pattern.pattern_at_object(object, point) 
+            Pattern::StripePattern(pattern) => {
+                pattern.pattern_at_object(object, point) 
             },
-            Pattern::RingPattern(ring_pattern) => {
-                ring_pattern.pattern_at_object(object, point)
+            Pattern::RingPattern(pattern) => {
+                pattern.pattern_at_object(object, point)
+            },
+            Pattern::GradientPattern(pattern) => {
+                pattern.pattern_at_object(object, point)
+            },
+            Pattern::CheckeredPattern(pattern) => {
+                pattern.pattern_at_object(object, point)
             }
         }
         }

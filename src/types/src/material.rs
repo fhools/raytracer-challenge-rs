@@ -1,5 +1,4 @@
 use crate::Color;
-use crate::StripePattern;
 use crate::Pattern;
 
 #[derive(Debug, Clone)]
