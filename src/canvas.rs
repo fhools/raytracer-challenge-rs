@@ -50,7 +50,7 @@ impl Canvas {
 
     pub fn write_ppm<P: AsRef<Path>>(&self, filepath: P) -> Result<(), Box<dyn Error>> {
         let mut f = OpenOptions::new().write(true).create(true).open(filepath)?;
-        f.write(&self.write_ppm_str().as_bytes())?;
+        f.write_all(&self.write_ppm_str().as_bytes())?;
         Ok(())
     }
 
@@ -59,13 +59,13 @@ impl Canvas {
         let mut bw = BufWriter::new(Vec::new());
 
         // Write magic
-        write!(bw, "P3\n").expect("write ppm failed");
+        writeln!(bw, "P3").expect("write ppm failed");
 
         // width height
-        write!(bw, "{} {}\n", self.width, self.height).expect("write ppm failed");
+        writeln!(bw, "{} {}", self.width, self.height).expect("write ppm failed");
 
         // maximum color value
-        write!(bw, "{}\n", 255).expect("write ppm failed");
+        writeln!(bw, "{}", 255).expect("write ppm failed");
 
         // pixels, maximum 70 characters in each line
         // try to put one line for each row of pixels, except if it'
@@ -80,7 +80,7 @@ impl Canvas {
             let val = (255.0 * px).round().clamp(0.0, 255.0);
             let next_val = format!("{:.0}", val);
             if line_length + next_val.len() + 1 > MAX_COL {
-                write!(bw, "\n").expect("write ppm failed");
+                writeln!(bw).expect("write ppm failed");
                 line_length = 0;
             } 
             // output space after previous entry for entries after first one
@@ -91,14 +91,14 @@ impl Canvas {
             write!(bw, "{}", next_val).expect("write ppm failed");
 
             if cur_col >= self.width*3 {
-                write!(bw, "\n").expect("write ppm failed");
+                writeln!(bw).expect("write ppm failed");
                 cur_col = 0;
                 line_length = 0;
             }
             line_length += next_val.len();
         }
 
-        write!(bw, "\n").expect("write ppm failed");
+        writeln!(bw).expect("write ppm failed");
 
         String::from_utf8(bw.into_inner().unwrap()).unwrap()
     }
