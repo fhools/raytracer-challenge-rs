@@ -25,5 +25,5 @@ A: There is currenly no code in src/main.rs. If you want to see an image, look
 cargo test --release
 ```
 
-    The rendering will output a .ppm file which you can view in Preview.app
+The rendering will output a .ppm file which you can view in Preview.app
 
