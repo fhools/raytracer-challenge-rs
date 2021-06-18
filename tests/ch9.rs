@@ -50,7 +50,7 @@ fn test_raytrace_with_camera_floor() {
         for y in 0..(camera.vsize_px - 1) {
             for x in 0..(camera.hsize_px - 1) {
                 let ray = ray_for_pixel(&camera, x, y); 
-                let color = color_at(&world, ray);
+                let color = color_at(&world, ray, 0);
                 canvas.set_pixel(x, y, &color);
             }
         }
@@ -91,7 +91,7 @@ fn test_raytrace_with_camera_floor_and_wall() {
         for y in 0..(camera.vsize_px - 1) {
             for x in 0..(camera.hsize_px - 1) {
                 let ray = ray_for_pixel(&camera, x, y); 
-                let color = color_at(&world, ray);
+                let color = color_at(&world, ray, 0);
                 canvas.set_pixel(x, y, &color);
             }
         }

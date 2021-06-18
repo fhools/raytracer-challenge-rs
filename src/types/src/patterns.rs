@@ -69,7 +69,7 @@ impl Patternable for StripePattern {
 impl Default for StripePattern {
     fn default() -> Self {
         StripePattern {
-            colors: [Color::white(), Color::black()],
+            colors: [Color::white(), Color::BLACK],
             transform: Matrix4x4::new()
         }
     }
@@ -121,7 +121,7 @@ impl Patternable for RingPattern {
 impl Default for RingPattern {
     fn default() -> Self {
         RingPattern {
-            colors: [Color::white(), Color::black()],
+            colors: [Color::white(), Color::BLACK],
             transform: Matrix4x4::new()
         }
     }
@@ -173,7 +173,7 @@ impl Patternable for GradientPattern {
 impl Default for GradientPattern {
     fn default() -> Self {
         GradientPattern {
-            colors: [Color::white(), Color::black()],
+            colors: [Color::white(), Color::BLACK],
             transform: Matrix4x4::new()
         }
     }
@@ -228,7 +228,7 @@ impl Patternable for CheckeredPattern {
 impl Default for CheckeredPattern {
     fn default() -> Self {
         CheckeredPattern {
-            colors: [Color::white(), Color::black()],
+            colors: [Color::white(), Color::BLACK],
             transform: Matrix4x4::new()
         }
     }

@@ -233,6 +233,7 @@ fn test_raytrace_with_camera_multiple_spheres_gradient_pattern() {
 }
 
 #[test]
+#[ignore="render"]
 fn test_raytrace_with_camera_multiple_spheres_checkered_pattern() {
     const WIDTH_PX: usize = 480;
     const HEIGHT_PX: usize = 320;

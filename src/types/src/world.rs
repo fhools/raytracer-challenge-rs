@@ -9,6 +9,8 @@ use crate::Color;
 use crate::Ray;
 use crate::Vector4D;
 use crate::hit;
+use crate::color_at;
+use crate::ShadeComputation;
 pub struct World {
     pub light_source: LightSource,
     pub objects: Vec<Shape>,
@@ -56,6 +58,19 @@ impl World {
         } else {
             false
         }
+    }
+
+    pub fn reflected_color(&self, shade_computation: &ShadeComputation, remaining: usize) -> Color {
+        if remaining == 0 {
+            return Color::BLACK;
+        }
+
+        if shade_computation.obj.get_material().reflexivity == 0.0 {
+            return Color::BLACK;
+        }
+        let reflect_ray = Ray::new(shade_computation.over_point, shade_computation.reflectv);
+        let color = color_at(self, reflect_ray, remaining - 1);
+        return color * shade_computation.obj.get_material().reflexivity;
     }
 }
 

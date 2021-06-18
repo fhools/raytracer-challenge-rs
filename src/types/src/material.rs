@@ -9,6 +9,7 @@ pub struct Material {
     pub specular: f64,
     pub shininess: f64,
     pub pattern: Option<Box<Pattern>>,
+    pub reflexivity: f64,
 }
 
 impl Material {
@@ -30,6 +31,7 @@ impl Default for Material {
             specular: 0.9,
             shininess: 200.0,
             pattern:  None,
+            reflexivity: 0.0
         }
     }
 }

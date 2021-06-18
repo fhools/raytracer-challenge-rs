@@ -87,7 +87,7 @@ fn shade_intersection() {
     };
 
     let c = r.prepare_computations(&i);
-    let color = shade_hit(&w, &c);
+    let color = shade_hit(&w, &c, 0);
     assert_f64_eq!(color.red, 0.380661193);
     assert_f64_eq!(color.green, 0.475826491);
     assert_f64_eq!(color.blue, 0.2854958948);
@@ -105,7 +105,7 @@ fn shade_intersection_inside() {
     };
 
     let c = r.prepare_computations(&i);
-    let color = shade_hit(&w, &c);
+    let color = shade_hit(&w, &c, 0);
     assert_f64_eq!(color.red, 0.90498447208);
     assert_f64_eq!(color.green, 0.90498447208);
     assert_f64_eq!(color.blue, 0.90498447208);
@@ -115,7 +115,7 @@ fn shade_intersection_inside() {
 fn color_at_hit() {
     let world: World = Default::default();
     let r = Ray::new(Vector4D::new_point(0.0, 0.0, -5.0), Vector4D::new_vector(0.0, 0.0, 1.0));
-    let color = color_at(&world, r);
+    let color = color_at(&world, r, 0);
     assert_f64_eq!(color.red, 0.380661193);
     assert_f64_eq!(color.green, 0.475826491);
     assert_f64_eq!(color.blue, 0.2854958948);
@@ -125,7 +125,7 @@ fn color_at_hit() {
 fn color_at_nohits() {
     let world: World = Default::default();
     let r = Ray::new(Vector4D::new_point(0.0, 0.0, -5.0), Vector4D::new_vector(0.0, 1.0, 0.0));
-    let color = color_at(&world, r);
+    let color = color_at(&world, r, 0);
     assert_f64_eq!(color.red, 0.0);
     assert_f64_eq!(color.green, 0.0);
     assert_f64_eq!(color.blue, 0.0);
@@ -140,7 +140,7 @@ fn color_at_behind_ray() {
             s2.material.ambient = 1.0;
             let innercolor = s2.material.color;
             let r = Ray::new(Vector4D::new_point(0.0, 0.0, 0.75), Vector4D::new_vector(0.0, 0.0, -1.0));
-            let color = color_at(&world, r);
+            let color = color_at(&world, r, 0);
             println!("### color: {:?} inner color: {:?}", color, innercolor);
             assert_f64_eq!(color.red, innercolor.red);
             assert_f64_eq!(color.green, innercolor.green);
@@ -273,7 +273,7 @@ fn test_raytrace_with_camera() {
         for y in 0..(camera.vsize_px - 1) {
             for x in 0..(camera.hsize_px - 1) {
                 let ray = ray_for_pixel(&camera, x, y); 
-                let color = color_at(&world, ray);
+                let color = color_at(&world, ray, 0);
                 canvas.set_pixel(x, y, &color);
             }
         }

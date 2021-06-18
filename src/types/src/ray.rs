@@ -8,6 +8,7 @@ use crate::Shape;
 use crate::Color;
 use crate::lighting;
 use crate::hit;
+use crate::reflect;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
@@ -83,7 +84,8 @@ impl Ray {
             eyev: eyev,
             normalv: normalv,
             inside: inside,
-            over_point: over_point
+            over_point: over_point,
+            reflectv: reflect(self.dir(), normalv)
         }
     }
 
@@ -102,10 +104,11 @@ pub struct ShadeComputation {
     pub eyev: Vector4D,
     pub normalv: Vector4D,
     pub inside: bool,
-    pub over_point: Vector4D
+    pub over_point: Vector4D,
+    pub reflectv: Vector4D,
 }
 
-pub fn shade_hit(world: &World, sc: &ShadeComputation) -> Color {
+pub fn shade_hit(world: &World, sc: &ShadeComputation, remaining: usize) -> Color {
     let shape : &dyn Intersectable;
     match *sc.obj {
         Shape::Sphere(ref s) => {
@@ -118,15 +121,17 @@ pub fn shade_hit(world: &World, sc: &ShadeComputation) -> Color {
             shape =p;
         }
     }
-    lighting(shape.get_material(), shape, world.light_source, sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point))
+    let surface =  lighting(shape.get_material(), shape, world.light_source, sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point));
+    let reflected = world.reflected_color(sc, remaining);
+    return surface + reflected;
 }
 
-pub fn color_at(world: &World, ray: Ray) -> Color {
+pub fn color_at(world: &World, ray: Ray, remaining: usize) -> Color {
     let xs = ray.intersect_world(world);
     if let Some(xs) = hit(&xs) {
         let sc = ray.prepare_computations(&xs);
-        shade_hit(world, &sc)
+        shade_hit(world, &sc, remaining)
     } else {
-        Color::black()
+        Color::BLACK
     }
 }

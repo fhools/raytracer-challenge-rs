@@ -53,14 +53,14 @@ pub fn lighting(material: Material,
     let diffuse; 
     let specular;
     if light_dot_normal < 0.0 || shadow {
-        diffuse = Color::black();
-        specular = Color::black();
+        diffuse = Color::BLACK;
+        specular = Color::BLACK;
     } else {
         diffuse = effective_color * material.diffuse * light_dot_normal;
         let reflectv = reflect(-lightv, normalv);
         let reflect_dot_eye = reflectv.dot(eyev);
         if reflect_dot_eye <= 0.0 {
-            specular = Color::black();
+            specular = Color::BLACK;
         } else {
             let factor = reflect_dot_eye.powf(material.shininess);
             specular = light.intensity * material.specular * factor;

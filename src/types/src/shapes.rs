@@ -26,6 +26,35 @@ impl Shape {
             }
         }
     }
+
+    pub fn get_material(&self) -> Material {
+        match *self {
+            Shape::Sphere(ref s) => {
+                s.get_material()
+            },
+            Shape::TestShape(ref t) => {
+                t.get_material()
+            },
+            Shape::Plane(ref p) => {
+                p.get_material()
+            }
+        }
+    }
+
+    pub fn set_material(&mut self, material: &Material) {
+        match *self {
+            Shape::Sphere(ref mut s) => {
+                s.set_material(material.clone())
+            },
+            Shape::TestShape(ref mut t) => {
+                t.set_material(material.clone())
+            },
+            Shape::Plane(ref mut p) => {
+                p.set_material(material.clone())
+            }
+        }
+    }
+
 }
 
 #[derive(Debug,  Clone)]
