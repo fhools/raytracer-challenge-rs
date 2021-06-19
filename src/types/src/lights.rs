@@ -41,6 +41,9 @@ pub fn lighting(material: Material,
             },
             Pattern::CheckeredPattern(pattern) => {
                 pattern.pattern_at_object(object, point)
+            },
+            Pattern::TestPattern(pattern) => {
+                pattern.pattern_at_object(object, point)
             }
         }
         }

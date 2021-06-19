@@ -21,7 +21,6 @@ impl Camera {
         if aspect >= 1.0 {
             half_width = half_view;
             half_height = half_view / aspect;
-            println!("half_width: {}, half_height: {}", half_width,half_height);
         } else {
             half_width = half_view * aspect;
             half_height = half_view;

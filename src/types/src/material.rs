@@ -10,6 +10,17 @@ pub struct Material {
     pub shininess: f64,
     pub pattern: Option<Box<Pattern>>,
     pub reflexivity: f64,
+    pub refractive_index: f64,
+    pub transparency: f64,
+    
+}
+
+pub mod refractive_indices {
+    pub const AIR: f64 = 1.00029;
+    pub const GLASS: f64 = 1.52;
+    pub const DIAMOND: f64 = 2.417;
+    pub const VACUUM: f64 = 1.0;
+    pub const DEFAULT: f64 = VACUUM;
 }
 
 impl Material {
@@ -31,7 +42,9 @@ impl Default for Material {
             specular: 0.9,
             shininess: 200.0,
             pattern:  None,
-            reflexivity: 0.0
+            reflexivity: 0.0,
+            refractive_index: refractive_indices::DEFAULT,
+            transparency: 0.0,
         }
     }
 }

@@ -206,7 +206,8 @@ impl Intersectable for Sphere {
         match other { 
             Shape::Sphere(ref sphere) => {
                 self.origin.eq(&sphere.origin) &&
-                f64_eq(self.radius, sphere.radius) 
+                f64_eq(self.radius, sphere.radius) &&
+                self.transform.eq(&sphere.transform)
             },
             _ => { false }
         }
@@ -242,6 +243,19 @@ impl Sphere {
             radius: 1.0,
             transform: Matrix4x4::new(),
             material: Default::default(),
+            saved_ray: Cell::new(None)
+        }
+    }
+
+    pub fn new_glass() -> Sphere {
+        let mut m: Material = Default::default();
+        m.transparency = 1.0;
+        m.refractive_index = 1.5;
+        Sphere {
+            origin: Vector4D::new_point(0.0, 0.0, 0.0),
+            radius: 1.0,
+            transform: Matrix4x4::new(),
+            material: m,
             saved_ray: Cell::new(None)
         }
     }

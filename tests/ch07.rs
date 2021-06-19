@@ -32,7 +32,7 @@ fn test_prepare_computations() {
                 t: 4.0
     };
 
-    let c = r.prepare_computations(&i);
+    let c = r.prepare_computations(&i, &vec![]);
     assert_f64_eq!(c.t, i.t);
     assert!(i.obj.eq(&*c.obj));
     assert_vector4d_eq!(c.eyev, Vector4D::new_vector(0.0, 0.0, -1.0));
@@ -49,7 +49,7 @@ fn test_prepare_computations_inside_hit_false() {
                 t: 4.0
     };
 
-    let c = r.prepare_computations(&i);
+    let c = r.prepare_computations(&i, &vec![]);
     assert_f64_eq!(c.t, i.t);
     assert!(i.obj.eq(&*c.obj));
     assert_vector4d_eq!(c.eyev, Vector4D::new_vector(0.0, 0.0, -1.0));
@@ -67,7 +67,7 @@ fn test_prepare_computations_inside_hit_true() {
                 t: 1.0
     };
 
-    let c = r.prepare_computations(&i);
+    let c = r.prepare_computations(&i, &vec![]);
     assert_f64_eq!(c.t, i.t);
     assert!(i.obj.eq(&*c.obj));
     assert_vector4d_eq!(c.eyev, Vector4D::new_vector(0.0, 0.0, -1.0));
@@ -86,7 +86,7 @@ fn shade_intersection() {
                 t: 4.0
     };
 
-    let c = r.prepare_computations(&i);
+    let c = r.prepare_computations(&i, &vec![]);
     let color = shade_hit(&w, &c, 0);
     assert_f64_eq!(color.red, 0.380661193);
     assert_f64_eq!(color.green, 0.475826491);
@@ -104,7 +104,7 @@ fn shade_intersection_inside() {
                 t: 0.5
     };
 
-    let c = r.prepare_computations(&i);
+    let c = r.prepare_computations(&i, &vec![]);
     let color = shade_hit(&w, &c, 0);
     assert_f64_eq!(color.red, 0.90498447208);
     assert_f64_eq!(color.green, 0.90498447208);

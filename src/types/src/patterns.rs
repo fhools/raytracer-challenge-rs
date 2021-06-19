@@ -9,7 +9,8 @@ pub enum Pattern {
     StripePattern(StripePattern),
     RingPattern(RingPattern),
     GradientPattern(GradientPattern),
-    CheckeredPattern(CheckeredPattern)
+    CheckeredPattern(CheckeredPattern),
+    TestPattern(TestPattern),
 }
 
 pub trait Patternable {
@@ -37,6 +38,14 @@ impl StripePattern {
             transform: Matrix4x4::new(),
         }
     }
+
+    pub fn test() -> StripePattern {
+        StripePattern {
+            colors: [Color::new(1.0, 1.5, 2.0), Color::new(0.75, 0.5, 0.25)],
+            transform: Matrix4x4::new(),
+        }
+    }
+
 }
 
 
@@ -229,6 +238,53 @@ impl Default for CheckeredPattern {
     fn default() -> Self {
         CheckeredPattern {
             colors: [Color::white(), Color::BLACK],
+            transform: Matrix4x4::new()
+        }
+    }
+}
+
+// A checkered pattern pattern creates a pattern that interpolates between 2 colores along the
+// x-axis 
+
+#[derive(Debug, Clone, Copy)]
+pub struct TestPattern {
+    pub transform: Matrix4x4,
+}
+
+impl TestPattern {
+    pub fn new() -> TestPattern {
+        TestPattern {
+            transform: Matrix4x4::new(),
+        }
+    }
+}
+
+
+//impl std::fmt::Debug for StripePattern {
+//    fn  fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+//        write!(fmt, "StripePattern (Colors: {:?}, Transform: {:?}", self.colors, self.transform)
+//    }
+//}
+
+
+impl Patternable for TestPattern {
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
+    }
+
+    fn set_transform(&mut self, transform: Matrix4x4) {
+        self.transform = transform;
+    }
+
+    fn pattern_at(&self, point: Vector4D) -> Color {
+        Color::new(point.x, point.y, point.z)
+    }
+
+}
+
+impl Default for TestPattern {
+    fn default() -> Self {
+        TestPattern {
             transform: Matrix4x4::new()
         }
     }

@@ -60,8 +60,8 @@ impl World {
         }
     }
 
-    pub fn reflected_color(&self, shade_computation: &ShadeComputation, remaining: usize) -> Color {
-        if remaining == 0 {
+    pub fn reflected_color(&self, shade_computation: &ShadeComputation, reflect_rays_remaining: usize) -> Color {
+        if reflect_rays_remaining == 0 {
             return Color::BLACK;
         }
 
@@ -69,8 +69,42 @@ impl World {
             return Color::BLACK;
         }
         let reflect_ray = Ray::new(shade_computation.over_point, shade_computation.reflectv);
-        let color = color_at(self, reflect_ray, remaining - 1);
+        let color = color_at(self, reflect_ray, reflect_rays_remaining - 1);
         return color * shade_computation.obj.get_material().reflexivity;
+    }
+
+
+    pub fn refracted_color(&self, shade_computation: &ShadeComputation, reflectrays_remaining: usize) -> Color {
+        // Compute snell's law 
+        // sin(theta_i) / sin(theta_t) = n1/n2 
+        /*
+        println!("eyev: {:?}, under_point: {:?} n1: {:?}, n2: {:?}, obj: {:?}",
+                 shade_computation.eyev,
+                 shade_computation.under_point,
+                 shade_computation.n1,
+                 shade_computation.n2,
+                 *shade_computation.obj);
+        */
+        let n1_n2_ratio = shade_computation.n1 / shade_computation.n2;
+        let cos_theta_i  = shade_computation.eyev.dot(shade_computation.normalv);
+        let sin2_theta_t = n1_n2_ratio.powf(2.0) * (1.0 - cos_theta_i.powf(2.0));
+
+
+        if reflectrays_remaining == 0 || sin2_theta_t > 1.0 || shade_computation.obj.get_material().transparency == 0.0 {
+            return Color::BLACK;
+        }
+
+        let cos_theta_t = (1.0 - sin2_theta_t).sqrt();
+         
+        let refracted_ray_dir = (n1_n2_ratio * cos_theta_i - cos_theta_t) * shade_computation.normalv - 
+            n1_n2_ratio * shade_computation.eyev;
+        let refracted_ray = Ray::new(shade_computation.under_point, refracted_ray_dir);
+        //println!("refracted_ray: {:?}", refracted_ray);
+        let refracted_color_at = color_at(self, refracted_ray, reflectrays_remaining - 1);
+        //println!("refracted color_at: {:?}", refracted_color_at);
+        let refracted_color =  refracted_color_at * 
+            shade_computation.obj.get_material().transparency;
+        refracted_color 
     }
 }
 
