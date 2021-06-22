@@ -76,7 +76,11 @@ impl Ray {
             Shape::Plane(plane) => {
                 normalv = plane.normal_at(p);
                 obj = Shape::Plane(plane.clone());
-            }
+            },
+            Shape::Cube(cube) => {
+                normalv = cube.normal_at(p);
+                obj = Shape::Cube(cube.clone());
+            },
         }
 
         if normalv.dot(eyev) < 0.0 {

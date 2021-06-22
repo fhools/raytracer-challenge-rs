@@ -38,8 +38,10 @@ impl World {
                 },
                 Shape::Plane(p) => {
                     vs.extend(ray.intersect(p));
-                }
-
+                },
+                Shape::Cube(c) => {
+                    vs.extend(ray.intersect(c));
+                },
             }
         }
         vs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());

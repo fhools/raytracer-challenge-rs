@@ -39,7 +39,10 @@ pub fn lighting(material: Material,
         },
         Shape::TestShape(ref o) => {
             object = o;
-        }
+        },
+        Shape::Cube(ref o) => {
+            object = o;
+        },
     }
     let effective_color = match material.pattern {
         None => { material.color },

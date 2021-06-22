@@ -1,3 +1,4 @@
+use std::cmp;
 use utils::*;
 use crate::Vector4D;
 use crate::Matrix4x4;
@@ -10,6 +11,7 @@ pub enum Shape {
     Sphere(Sphere),
     TestShape(TestShape),
     Plane(Plane),
+    Cube(Cube),
 }
 
 impl Shape {
@@ -23,6 +25,9 @@ impl Shape {
             },
             Shape::Plane(ref p) => {
                 p.eq(&other)
+            },
+            Shape::Cube(ref c) => {
+                c.eq(&other)
             }
         }
     }
@@ -37,7 +42,10 @@ impl Shape {
             },
             Shape::Plane(ref p) => {
                 p.get_material()
-            }
+            },
+            Shape::Cube(ref c) => {
+                c.get_material()
+            },
         }
     }
 
@@ -51,7 +59,10 @@ impl Shape {
             },
             Shape::Plane(ref mut p) => {
                 p.set_material(material.clone())
-            }
+            },
+            Shape::Cube(ref mut c) => {
+                c.set_material(material.clone())
+            },
         }
     }
 
@@ -67,9 +78,11 @@ impl Shape {
             Shape::Plane(ref o) => {
                 o.normal_at(point)
             },
+            Shape::Cube(ref o) => {
+                o.normal_at(point)
+            },
         }
     }
-
 }
 
 #[derive(Debug,  Clone)]
@@ -79,7 +92,6 @@ pub struct Intersection {
 }
 
 pub type Intersections = Vec<Intersection>;
-
 
 pub fn hit(xs: &Intersections) -> Option<Intersection> {
     let mut s = xs.clone();
@@ -97,6 +109,33 @@ pub fn positive_hits(xs: &Intersections) -> Intersections {
     s.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
     let positive_xs = s.iter().filter(|a|a.t >= 0.0).cloned().collect::<Intersections>();
     positive_xs
+}
+
+
+
+// Axis Aligned Boundary Box helpers
+// ---------------------------------
+#[derive(Debug, Clone)]
+struct TMinMax(f64, f64);
+
+fn check_axis(origin: f64, direction: f64) -> TMinMax {
+   let left_axis = -1.0 - origin;
+   let right_axis = 1.0 - origin;
+
+   let tmin;
+   let tmax;
+   if direction.abs() > utils::EPSILON {
+        tmin = left_axis / direction;
+        tmax = right_axis / direction;
+   } else {
+       tmin = left_axis * utils::INFINITY;
+       tmax = right_axis * utils::INFINITY;
+   }
+   if tmin > tmax {
+       TMinMax(tmax, tmin)
+   } else {
+       TMinMax(tmin, tmax)
+   }
 }
 
 pub trait Intersectable {
@@ -339,6 +378,86 @@ impl Intersectable for Plane {
 impl Plane {
     pub fn new() -> Plane {
         Plane {
+            material: Default::default(),
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Cube {
+    pub transform: Matrix4x4,
+    pub material: Material,
+    saved_ray: Cell<Option<Ray>>
+}
+
+impl Intersectable for Cube {
+    fn intersect(&self, ray: &Ray) -> Intersections {
+        let ray = ray.transform(&self.get_transform().inverse());
+        println!("cube local ray: {:?}", ray);
+        self.saved_ray.set(Some(ray));
+
+        let TMinMax(xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
+        let TMinMax(ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
+        let TMinMax(ztmin, ztmax) = check_axis(ray.origin.z, ray.direction.z);
+        let tmin = xtmin.max(ytmin).max(ztmin);
+        let tmax = xtmax.min(ytmax).min(ztmax);
+
+        if tmin > tmax {
+            vec![]
+        } else {
+            vec![
+                Intersection {
+                    t: tmin, 
+                    obj: Box::new(Shape::Cube((*self).clone()))
+                },
+                Intersection {
+                    t: tmax,
+                    obj: Box::new(Shape::Cube((*self).clone()))
+                }]
+        }
+    }
+    fn eq(&self, other: &Shape) -> bool {
+        match other {
+            Shape::Cube(ref plane) => {
+                self.get_transform().eq(&plane.get_transform())
+            },
+            _ => { false }
+        }
+    }
+
+    fn set_transform(&mut self, m: Matrix4x4) {
+        self.transform = m
+    }
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
+    }
+    fn normal_at_local(&self, p: Vector4D) -> Vector4D {
+        let maxc = p.x.abs().max(p.y.abs().max(p.z.abs()));
+        if f64_eq(maxc, p.x.abs()) {
+            Vector4D::new_vector(p.x, 0.0, 0.0)
+        } else if f64_eq(maxc, p.y.abs()) {
+            Vector4D::new_vector(0.0, p.y, 0.0)
+        } else {
+            Vector4D::new_vector(0.0, 0.0, p.z)
+        }
+    }
+    fn get_material(&self) -> Material {
+        self.material.clone()
+    }
+    fn set_material(&mut self, material: Material) {
+        self.material = material.clone();
+    }
+
+    fn saved_ray(&self) -> Option<Ray> {
+        self.saved_ray.get()
+    }
+}
+
+impl Cube {
+    pub fn new() -> Cube {
+        Cube {
             material: Default::default(),
             transform: Matrix4x4::new(),
             saved_ray: Cell::new(None),

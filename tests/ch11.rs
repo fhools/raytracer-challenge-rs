@@ -474,6 +474,7 @@ fn test_shade_hit_with_shlick() {
 
 
 #[test]
+#[ignore="render"]
 fn test_render_gold_glass_ball() {
     let mut world: World = Default::default();
     world.objects.clear();
