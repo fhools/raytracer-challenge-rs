@@ -118,7 +118,7 @@ impl Patternable for RingPattern {
     }
 
     fn pattern_at(&self, point: Vector4D) -> Color {
-        if (point.x.powf(2.0) + point.z.powf(2.0)).sqrt().floor() as i64 % 2 == 0 {
+        if (point.x.powi(2) + point.z.powi(2)).sqrt().floor() as i64 % 2 == 0 {
             self.colors[0]
         } else {
             self.colors[1]
@@ -277,6 +277,7 @@ impl Patternable for TestPattern {
     }
 
     fn pattern_at(&self, point: Vector4D) -> Color {
+        println!("Requested TestPattern at: {:?}", point);
         Color::new(point.x, point.y, point.z)
     }
 

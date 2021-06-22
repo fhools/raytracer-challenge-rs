@@ -9,7 +9,8 @@ pub struct Material {
     pub specular: f64,
     pub shininess: f64,
     pub pattern: Option<Box<Pattern>>,
-    pub reflexivity: f64,
+    pub no_cast_shadow: bool,
+    pub reflective: f64,
     pub refractive_index: f64,
     pub transparency: f64,
     
@@ -42,7 +43,8 @@ impl Default for Material {
             specular: 0.9,
             shininess: 200.0,
             pattern:  None,
-            reflexivity: 0.0,
+            no_cast_shadow: false,
+            reflective: 0.0,
             refractive_index: refractive_indices::DEFAULT,
             transparency: 0.0,
         }

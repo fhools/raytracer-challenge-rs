@@ -55,6 +55,21 @@ impl Shape {
         }
     }
 
+
+    pub fn normal_at(&self, point: Vector4D) -> Vector4D {
+        match *self {
+            Shape::Sphere(ref o) => {
+                o.normal_at(point)
+            },
+            Shape::TestShape(ref o) => {
+                o.normal_at(point)
+            },
+            Shape::Plane(ref o) => {
+                o.normal_at(point)
+            },
+        }
+    }
+
 }
 
 #[derive(Debug,  Clone)]
@@ -75,6 +90,13 @@ pub fn hit(xs: &Intersections) -> Option<Intersection> {
         }
     }
     None
+}
+
+pub fn positive_hits(xs: &Intersections) -> Intersections {
+    let mut s = xs.clone();
+    s.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+    let positive_xs = s.iter().filter(|a|a.t >= 0.0).cloned().collect::<Intersections>();
+    positive_xs
 }
 
 pub trait Intersectable {
@@ -186,12 +208,14 @@ impl Intersectable for Sphere {
             return vec![];
         }
         let mut intersections : Vec<Intersection> = vec![];
+        let sphere_clone = (*self).clone();
+        println!("sphere: intersect cloned obj: {:?}", sphere_clone);
         intersections.push(Intersection {
-            obj: Box::new(Shape::Sphere((*self).clone())),
+            obj: Box::new(Shape::Sphere(sphere_clone.clone())),
             t: (-b - discriminant.sqrt()) / (2.0 * a) 
         });
         intersections.push(Intersection {
-            obj: Box::new(Shape::Sphere((*self).clone())),
+            obj: Box::new(Shape::Sphere(sphere_clone)),
             t: (-b + discriminant.sqrt()) / (2.0 * a)
         });
         intersections
@@ -271,8 +295,9 @@ pub struct Plane {
 impl Intersectable for Plane {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.get_transform().inverse());
+        println!("plane local ray: {:?}", ray);
         self.saved_ray.set(Some(ray));
-        if ray.direction.y.abs() < 0.00001 {
+        if ray.direction.y.abs() < EPSILON {
             vec![]
         } else {
             let t = -ray.origin.y / ray.direction.y;

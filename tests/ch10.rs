@@ -59,6 +59,25 @@ fn pattern_at_object_object_and_pattern_transform() {
 }
 
 #[test]
+fn pattern_with_test_pattern() {
+    let mut s = Sphere::new();
+    s.set_transform(Matrix4x4::scaling(2.0, 2.0, 2.0));
+    let p : TestPattern = Default::default();
+    let c = p.pattern_at_object(&s, Vector4D::new_point(2.0, 3.0, 4.0));
+    assert_color_eq!(c, Color::new(1.0, 1.5, 2.0));
+}
+
+#[test]
+fn pattern_with_test_pattern_object_transformed_pattern_transformed() {
+    let mut s = Sphere::new();
+    s.set_transform(Matrix4x4::scaling(2.0, 2.0, 2.0));
+    let mut p : TestPattern = Default::default();
+    p.set_transform(Matrix4x4::translation(0.5, 1.0, 1.5));
+    let c = p.pattern_at_object(&s, Vector4D::new_point(2.5, 3.0, 3.5));
+    assert_color_eq!(c, Color::new(0.75, 0.5, 0.25));
+}
+
+#[test]
 #[ignore="render"]
 fn test_raytrace_with_camera_multiple_spheres_pattern() {
     const WIDTH_PX: usize = 320;

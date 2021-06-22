@@ -3,6 +3,7 @@ use crate::Vector4D;
 use crate::reflect;
 use crate::Material;
 use crate::Intersectable;
+use crate::Shape;
 use crate::Pattern;
 use crate::Patternable;
 #[derive(Copy,Clone, Debug)]
@@ -22,11 +23,24 @@ impl LightSource {
 }
 
 pub fn lighting(material: Material, 
-                object: &dyn Intersectable,
+                shape: &Shape,
                 light: LightSource, 
                 point: Vector4D, eyev: Vector4D, normalv: Vector4D, shadow: bool) -> Color {
 
-    
+    println!("lighting obj: {:?}\nshadow:{}", shape, shadow); 
+   
+    let object : &dyn Intersectable;
+    match *shape {
+        Shape::Plane(ref o) => {
+            object = o;
+        },
+        Shape::Sphere(ref o ) => {
+            object = o;
+        },
+        Shape::TestShape(ref o) => {
+            object = o;
+        }
+    }
     let effective_color = match material.pattern {
         None => { material.color },
         Some(pattern) =>  {  match *pattern {

@@ -1,4 +1,4 @@
-pub const EPSILON: f64 = 0.00001;
+pub const EPSILON: f64 = 0.0001;
 #[macro_export]
 macro_rules! assert_f64_eq {
     ($left:expr , $right:expr) => ({

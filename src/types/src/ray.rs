@@ -1,3 +1,5 @@
+use std::ptr;
+
 use crate::Vector4D;
 use crate::Matrix4x4;
 use crate::Intersectable;
@@ -89,7 +91,10 @@ impl Ray {
         let hit : &Intersection = intersection;
         let mut containers: Vec<Box<Shape>> = vec![];
         for  i in xs.iter() {
-            if f64_eq(i.t, hit.t) {
+            let i_obj = &i.obj; 
+            let hit_obj = &hit.obj;
+            let i_is_eq_hit = (*i_obj).eq(&*hit_obj);
+            if f64_eq(hit.t, i.t) {
                 if containers.len() == 0 {
                     refract_n1 = refractive_indices::VACUUM; 
                 } else {
@@ -107,7 +112,7 @@ impl Ray {
                     containers.push(Box::new((*i.obj).clone()));
                 }
             }
-            if f64_eq(i.t, hit.t) {
+            if f64_eq(hit.t, i.t) {
                 if containers.len() == 0 {
                     refract_n2 = refractive_indices::VACUUM;
                 } else {
@@ -119,8 +124,8 @@ impl Ray {
         }
         // Used during shadow computation, so that shadow ray doesn't intersect the point of
         // intersection at object, we compute a point above the normal
-        let over_point = p + utils::EPSILON*normalv;
-        let under_point = p - utils::EPSILON*normalv;
+        let over_point = p + 1.0*utils::EPSILON*normalv; // direciton of normal above point of intersection
+        let under_point = p - 1.0*utils::EPSILON*normalv; // direction away from normal below point of intersection
         ShadeComputation {
             t: intersection.t,
             obj: Box::new(obj),
@@ -159,6 +164,7 @@ pub struct ShadeComputation {
 }
 
 pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: usize) -> Color {
+    /*
     let shape : &dyn Intersectable;
     match *sc.obj {
         Shape::Sphere(ref s) => {
@@ -171,15 +177,24 @@ pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: u
             shape = p;
         }
     }
-    let surface =  lighting(shape.get_material(), shape, world.light_source, sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point));
+    */
+    let surface =  lighting(sc.obj.get_material(), 
+                            &*sc.obj, 
+                            world.light_source,
+                            sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point));
     let reflected = world.reflected_color(sc, reflect_rays_remaining);
     let refracted = world.refracted_color(sc, reflect_rays_remaining);
+    println!("shade_hit: {} surface color: {:?} reflected color: {:?}\nrefracted color: {:?}",
+             reflect_rays_remaining, surface, reflected, refracted);
 
     let mut m  = sc.obj.get_material();
-    if m.reflexivity > 0.0 && m.transparency > 0.0 {
+    if m.reflective > 0.0 && m.transparency > 0.0 {
         let reflectance = schlick(&sc);
+        println!("schlick: {:?}", reflectance);
         return surface + reflected*reflectance + (1.0  - reflectance)*refracted;
     } else { 
+        let total_color = surface + reflected + refracted;
+        println!("total_color: {:?}", total_color);
         return surface + reflected + refracted;
     }
 }
@@ -187,6 +202,7 @@ pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: u
 pub fn color_at(world: &World, ray: Ray, remaining: usize) -> Color {
     let xs = ray.intersect_world(world);
     if let Some(hit) = hit(&xs) {
+        println!("color_at remaining: {:?}\n {:?}", remaining, hit);
         let sc = ray.prepare_computations(&hit, &xs);
         shade_hit(world, &sc, remaining)
     } else {
@@ -196,15 +212,15 @@ pub fn color_at(world: &World, ray: Ray, remaining: usize) -> Color {
 
 pub fn schlick(sc: &ShadeComputation) -> f64 {
     let mut cos_eye_normal = sc.eyev.dot(sc.normalv);
-    if sc.n1  > sc.n2 {
+    if sc.n1 > sc.n2 {
         let n = sc.n1 / sc.n2;
-        let sin2_t = n.powf(2.0) * (1.0 - cos_eye_normal.powf(2.0));
+        let sin2_t = n.powi(2) * (1.0 - cos_eye_normal.powi(2));
         if sin2_t > 1.0 {
             return 1.0
         }
-        let cos_t = (1.0 - sin2_t.powf(2.0)).sqrt();
+        let cos_t = (1.0 - sin2_t.powi(2)).sqrt();
         cos_eye_normal = cos_t;
     }
-    let r0 = ((sc.n1 - sc.n2)/(sc.n1+sc.n2)).powf(2.0);
-    return r0 + (1.0 - r0)*(1.0 - cos_eye_normal).powf(5.0);
+    let r0 = ((sc.n1 - sc.n2)/(sc.n1+sc.n2)).powi(2);
+    return r0 + (1.0 - r0)*(1.0 - cos_eye_normal).powi(5);
 }
