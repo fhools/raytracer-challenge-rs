@@ -43,6 +43,9 @@ pub fn lighting(material: Material,
         Shape::Cube(ref o) => {
             object = o;
         },
+        Shape::Cylinder(ref o) => {
+            object = o;
+        },
     }
     let effective_color = match material.pattern {
         None => { material.color },

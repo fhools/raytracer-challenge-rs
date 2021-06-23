@@ -73,20 +73,20 @@ fn test_cube_normal_at() {
 
 
 #[test]
+#[ignore="render"]
 fn test_render_gold_cube() {
     let mut world: World = Default::default();
     world.objects.clear();
 
     let mut obj = Cube::new();
     obj.set_transform(MatrixChainer::new()
-                        .then(Matrix4x4::rotate_x(PI/4.0))
-                        .then(Matrix4x4::rotate_z(PI/4.0))
+                        .then(Matrix4x4::rotate_x(PI/6.0))
                        .then(Matrix4x4::translation(0.2, -2.0, 0.3))
-                       .then(Matrix4x4::scaling(1.3, 1.3, 1.3))
+                       .then(Matrix4x4::scaling(1.7, 1.7, 1.7))
                        .finish());
     let mut obj_mat: Material = Default::default();
     obj_mat.color = Color::new(1.0, 0.8431, 0.0);
-    obj_mat.reflective = 0.9;
+    obj_mat.reflective = 0.4;
     obj_mat.refractive_index = refractive_indices::GLASS;
     obj_mat.transparency = 1.0;
     obj.set_material(obj_mat);
@@ -100,8 +100,8 @@ fn test_render_gold_cube() {
     let mut wall_mat: Material = Default::default();
     wall_mat.color = Color::new(1.0, 0.8431, 0.0);
     wall_mat.specular = 0.8;
-    wall_mat.transparency = 1.0;
-    wall_mat.refractive_index = 1.33;
+    wall_mat.transparency = 0.8;
+    wall_mat.refractive_index = 1.83;
     wall_mat.pattern = Some(Box::new(Pattern::CheckeredPattern(CheckeredPattern::new(Color::new(1.0, 0.0, 0.0), Color::new(1.0, 1.0, 1.0)))));
     wall_mat.no_cast_shadow = true;
     wall.set_material(wall_mat);
@@ -111,7 +111,7 @@ fn test_render_gold_cube() {
     const WIDTH_PX: usize = 800;
     const HEIGHT_PX: usize = 600;
     world.light_source = LightSource::new(Color::new(1.0, 1.0, 1.0), 
-                                          Vector4D::new_point(-10.0, 10.0, 10.0));
+                                          Vector4D::new_point(-10.0, 10.0, -25.0));
 
     let mut c = Camera::new(WIDTH_PX, HEIGHT_PX, PI/3.0);
     let from = Vector4D::new_point(0.0, 5.0, 0.0);

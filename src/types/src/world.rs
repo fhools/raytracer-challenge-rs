@@ -42,6 +42,9 @@ impl World {
                 Shape::Cube(c) => {
                     vs.extend(ray.intersect(c));
                 },
+                Shape::Cylinder(c) => {
+                    vs.extend(ray.intersect(c));
+                },
             }
         }
         vs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());

@@ -1,4 +1,5 @@
 use std::cmp;
+use std::mem;
 use utils::*;
 use crate::Vector4D;
 use crate::Matrix4x4;
@@ -12,6 +13,7 @@ pub enum Shape {
     TestShape(TestShape),
     Plane(Plane),
     Cube(Cube),
+    Cylinder(Cylinder)
 }
 
 impl Shape {
@@ -28,7 +30,10 @@ impl Shape {
             },
             Shape::Cube(ref c) => {
                 c.eq(&other)
-            }
+            },
+            Shape::Cylinder(ref c) => {
+                c.eq(&other)
+            },
         }
     }
 
@@ -44,6 +49,9 @@ impl Shape {
                 p.get_material()
             },
             Shape::Cube(ref c) => {
+                c.get_material()
+            },
+            Shape::Cylinder(ref c) => {
                 c.get_material()
             },
         }
@@ -63,6 +71,9 @@ impl Shape {
             Shape::Cube(ref mut c) => {
                 c.set_material(material.clone())
             },
+            Shape::Cylinder(ref mut c) => {
+                c.set_material(material.clone())
+            },
         }
     }
 
@@ -79,6 +90,9 @@ impl Shape {
                 o.normal_at(point)
             },
             Shape::Cube(ref o) => {
+                o.normal_at(point)
+            },
+            Shape::Cylinder(ref o) => {
                 o.normal_at(point)
             },
         }
@@ -461,6 +475,154 @@ impl Cube {
             material: Default::default(),
             transform: Matrix4x4::new(),
             saved_ray: Cell::new(None),
+        }
+    }
+
+}
+
+#[derive(Debug, Clone)]
+pub struct Cylinder {
+    pub transform: Matrix4x4,
+    pub material: Material,
+    pub minimum: f64,
+    pub maximum: f64,
+    pub closed: bool,
+    saved_ray: Cell<Option<Ray>>
+}
+
+impl Intersectable for Cylinder {
+    fn intersect(&self, ray: &Ray) -> Intersections {
+    // Cylinder is unit radius with main axis along the y-axis.
+    // The intersection algorithm is same as that of a circle on the x-z plane
+        let ray = ray.transform(&self.get_transform().inverse());
+        self.saved_ray.set(Some(ray));
+
+        let mut intersections: Vec<_> = vec![];
+        let a = ray.dir().x.powf(2.0) + ray.dir().z.powf(2.0);
+        if f64_eq(a, 0.0) {
+            self.intersect_caps(&ray, &mut intersections);
+            return intersections;
+        }
+        // 2 * origin_xz dot dir_xz
+        let b = 2.0 * ray.origin().x * ray.dir().x  + 2.0 * ray.origin().z * ray.dir().z;
+        let c = ray.origin().x.powf(2.0) + ray.origin().z.powf(2.0) - 1.0;
+        let discr = b.powf(2.0) - (4.0 * a * c);
+
+        if discr < 0.0 {
+            return vec![];
+        }
+        let mut t0 =  (-b - discr.sqrt()) / (2.0 * a);
+        let mut t1 = (-b + discr.sqrt()) / (2.0 * a);
+        
+
+        if t0 > t1 { 
+            mem::swap(&mut t0, &mut t1);
+        }
+
+        let y0 = ray.origin().y + t0 * ray.dir().y;
+        if self.minimum < y0 && y0 < self.maximum {
+            intersections.push(Intersection {
+                obj: Box::new(Shape::Cylinder(self.clone())),
+                t: t0
+            });
+        }
+
+        let y1 = ray.origin().y + t1 * ray.dir().y;
+        if self.minimum < y1 && y1 < self.maximum {
+            intersections.push(Intersection {
+                obj: Box::new(Shape::Cylinder(self.clone())),
+                t: t1
+            });
+        }
+
+        self.intersect_caps(&ray, &mut intersections);
+        intersections
+    }
+
+    fn eq(&self, other: &Shape) -> bool {
+        match other {
+            Shape::Cylinder(ref cylinder) => {
+                self.get_transform().eq(&cylinder.get_transform())
+            },
+            _ => { false }
+        }
+    }
+
+    fn set_transform(&mut self, m: Matrix4x4) {
+        self.transform = m
+    }
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
+    }
+    fn normal_at_local(&self, p: Vector4D) -> Vector4D {
+        let dist = p.x.powi(2) + p.z.powi(2);
+        if dist < 1.0 && p.y >= (self.maximum - utils::EPSILON) {
+            Vector4D::new_vector(0.0, 1.0, 0.0)
+        } else if dist < 1.0 && p.y <= (self.minimum + utils::EPSILON) {
+            Vector4D::new_vector(0.0, -1.0, 0.0)
+        } else {
+            Vector4D::new_vector(p.x, 0.0, p.z)
+        }
+    }
+    fn get_material(&self) -> Material {
+        self.material.clone()
+    }
+    fn set_material(&mut self, material: Material) {
+        self.material = material.clone();
+    }
+
+    fn saved_ray(&self) -> Option<Ray> {
+        self.saved_ray.get()
+    }
+}
+
+impl Cylinder {
+    pub fn new() -> Cylinder {
+        Cylinder {
+            material: Default::default(),
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None),
+            minimum: -utils::INFINITY,
+            maximum: utils::INFINITY,
+            closed: false,
+        }
+    }
+    pub fn new_truncated(min: f64, max: f64, closed: bool) -> Cylinder {
+        Cylinder {
+            material: Default::default(),
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None),
+            minimum: min,
+            maximum: max,
+            closed: closed,
+        }
+    }
+
+    pub fn check_cap(&self, ray: &Ray, t: f64) -> bool {
+        let x = ray.origin().x + t * ray.dir().x;
+        let z = ray.origin().z + t * ray.dir().z;
+        (x.powi(2) + z.powi(2)) <= 1.0
+    }
+
+    pub fn intersect_caps(&self, ray: &Ray, xs: &mut Intersections) {
+        if !self.closed {
+            return;
+        }
+
+        let mut t = (self.minimum - ray.origin().y) / ray.dir().y;
+        if self.check_cap(ray, t) {
+            xs.push(Intersection {
+                obj: Box::new(Shape::Cylinder(self.clone())),
+                t: t
+            });
+        }
+
+        t = (self.maximum - ray.origin().y) / ray.dir().y;
+        if self.check_cap(ray, t) {
+            xs.push(Intersection {
+                obj: Box::new(Shape::Cylinder(self.clone())),
+                t: t
+            });
         }
     }
 }
