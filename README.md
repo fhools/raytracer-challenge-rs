@@ -11,6 +11,10 @@ a result of a w = 2.0. Which we could then detect as an error?
 
 So far it looks like adding w component is the right call. 
 
+## Glitches with rendering cone.
+There is some kind of ray intersection floating point rounding errors occuring causing graphical glitches.
+These show up as dark pixels in a arc across the image. It seems to be related to the refracted and reflected
+colors. It disppaears if we set the REFLECT_RAYS to 1, and shows if we set it greater than one
 
 # FAQ
 
