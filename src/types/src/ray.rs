@@ -175,20 +175,6 @@ pub struct ShadeComputation {
 }
 
 pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: usize) -> Color {
-    /*
-    let shape : &dyn Intersectable;
-    match *sc.obj {
-        Shape::Sphere(ref s) => {
-            shape = s;
-        },
-        Shape::TestShape(ref t) => {
-            shape = t;
-        },
-        Shape::Plane(ref p) => {
-            shape = p;
-        }
-    }
-    */
     let surface =  lighting(sc.obj.get_material(), 
                             &*sc.obj, 
                             world.light_source,

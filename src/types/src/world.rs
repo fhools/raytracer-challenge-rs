@@ -90,6 +90,10 @@ impl World {
         }
     }
 
+    pub fn is_shadowed_disabled(&self, point: Vector4D) -> bool {
+        false
+    }
+
     pub fn reflected_color(&self, shade_computation: &ShadeComputation, reflect_rays_remaining: usize) -> Color {
         if reflect_rays_remaining == 0 {
             return Color::BLACK;

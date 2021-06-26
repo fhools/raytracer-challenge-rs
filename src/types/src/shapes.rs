@@ -666,13 +666,11 @@ impl Intersectable for Cone {
             self.intersect_caps(&ray, &mut intersections);
             return intersections; 
         } else if f64_eq(a, 0.0) {
-            println!("intersect once");
             intersections.push(Intersection {
                 obj: Box::new(Shape::Cone(self.clone())),
                 t: -c/(2.0 * b)
             });
             self.intersect_caps(&ray, &mut intersections);
-            println!("intersect once and with caps. {} ", intersections.len());
             return intersections;
         }
 
@@ -695,7 +693,6 @@ impl Intersectable for Cone {
                 t: t0
             });
         }
-        println!("t0 intersections: {}", intersections.len());
 //        println!("int: {:?}", intersections);
         let y1 =  t1.mul_add(ray.dir().y,ray.origin().y);
         if self.minimum < y1 && y1 < self.maximum {
@@ -705,10 +702,8 @@ impl Intersectable for Cone {
             });
         }
 
-        println!("t1 intersections: {}", intersections.len());
  //       println!("int: {:?}", intersections);
         self.intersect_caps(&ray, &mut intersections);
-        println!("aftercaps  intersections: {}", intersections.len());
   //      println!("int: {:?}", intersections);
         intersections
     }
@@ -730,7 +725,7 @@ impl Intersectable for Cone {
     }
     fn normal_at_local(&self, p: Vector4D) -> Vector4D {
         let dist = (p.x.powf(2.0) + p.z.powf(2.0)).sqrt();
-        println!("normal: p: {:?}, dist: {}, max: {} min: {}", p, dist, self.maximum, self.minimum);
+        //println!("normal: p: {:?}, dist: {}, max: {} min: {}", p, dist, self.maximum, self.minimum);
         if dist < self.maximum.abs() && p.y >= (self.maximum - (utils::EPSILON)) {
             Vector4D::new_vector(0.0, 1.0, 0.0)
         } else if dist < self.minimum.abs() && p.y <= (self.minimum + (utils::EPSILON)) {

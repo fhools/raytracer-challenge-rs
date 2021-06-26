@@ -175,7 +175,7 @@ fn test_render_gold_cone() {
     let mut obj = Cone::new_truncated(-1.5, 1.5, true);
     //let mut obj = Cone::new();
     obj.set_transform(MatrixChainer::new()
-                        .then(Matrix4x4::rotate_x(-PI/2.0))
+                        .then(Matrix4x4::rotate_x(-PI/4.0))
                         .then(Matrix4x4::rotate_z(PI/2.0))
                         //.then(Matrix4x4::rotate_z(PI/2.0))
                        .then(Matrix4x4::translation(0.5, -1.0, 0.5))

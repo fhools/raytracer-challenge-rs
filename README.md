@@ -16,6 +16,9 @@ There is some kind of ray intersection floating point rounding errors occuring c
 These show up as dark pixels in a arc across the image. It seems to be related to the refracted and reflected
 colors. It disppaears if we set the REFLECT_RAYS to 1, and shows if we set it greater than one
 
+When we disabled shadows, the glitch also went away. This means that somehow the reflection ray is probably striking
+the cone where the color is pure black. 
+
 # FAQ
 
 Q: How do I actually render an image?
