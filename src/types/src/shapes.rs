@@ -13,7 +13,8 @@ pub enum Shape {
     TestShape(TestShape),
     Plane(Plane),
     Cube(Cube),
-    Cylinder(Cylinder)
+    Cylinder(Cylinder),
+    Cone(Cone)
 }
 
 impl Shape {
@@ -32,6 +33,9 @@ impl Shape {
                 c.eq(&other)
             },
             Shape::Cylinder(ref c) => {
+                c.eq(&other)
+            },
+            Shape::Cone(ref c) => {
                 c.eq(&other)
             },
         }
@@ -54,6 +58,9 @@ impl Shape {
             Shape::Cylinder(ref c) => {
                 c.get_material()
             },
+            Shape::Cone(ref c) => {
+                c.get_material()
+            },
         }
     }
 
@@ -72,6 +79,9 @@ impl Shape {
                 c.set_material(material.clone())
             },
             Shape::Cylinder(ref mut c) => {
+                c.set_material(material.clone())
+            },
+            Shape::Cone(ref mut c) => {
                 c.set_material(material.clone())
             },
         }
@@ -93,6 +103,9 @@ impl Shape {
                 o.normal_at(point)
             },
             Shape::Cylinder(ref o) => {
+                o.normal_at(point)
+            },
+            Shape::Cone(ref o) => {
                 o.normal_at(point)
             },
         }
@@ -262,7 +275,6 @@ impl Intersectable for Sphere {
         }
         let mut intersections : Vec<Intersection> = vec![];
         let sphere_clone = (*self).clone();
-        println!("sphere: intersect cloned obj: {:?}", sphere_clone);
         intersections.push(Intersection {
             obj: Box::new(Shape::Sphere(sphere_clone.clone())),
             t: (-b - discriminant.sqrt()) / (2.0 * a) 
@@ -348,7 +360,6 @@ pub struct Plane {
 impl Intersectable for Plane {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.get_transform().inverse());
-        println!("plane local ray: {:?}", ray);
         self.saved_ray.set(Some(ray));
         if ray.direction.y.abs() < EPSILON {
             vec![]
@@ -409,7 +420,6 @@ pub struct Cube {
 impl Intersectable for Cube {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.get_transform().inverse());
-        println!("cube local ray: {:?}", ray);
         self.saved_ray.set(Some(ray));
 
         let TMinMax(xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
@@ -555,7 +565,7 @@ impl Intersectable for Cylinder {
         self.transform
     }
     fn normal_at_local(&self, p: Vector4D) -> Vector4D {
-        let dist = p.x.powi(2) + p.z.powi(2);
+        let dist = p.x.powf(2.0) + p.z.powf(2.0);
         if dist < 1.0 && p.y >= (self.maximum - utils::EPSILON) {
             Vector4D::new_vector(0.0, 1.0, 0.0)
         } else if dist < 1.0 && p.y <= (self.minimum + utils::EPSILON) {
@@ -601,7 +611,7 @@ impl Cylinder {
     pub fn check_cap(&self, ray: &Ray, t: f64) -> bool {
         let x = ray.origin().x + t * ray.dir().x;
         let z = ray.origin().z + t * ray.dir().z;
-        (x.powi(2) + z.powi(2)) <= 1.0
+        (x.powf(2.0) + z.powf(2.0)) <= 1.0
     }
 
     pub fn intersect_caps(&self, ray: &Ray, xs: &mut Intersections) {
@@ -621,6 +631,175 @@ impl Cylinder {
         if self.check_cap(ray, t) {
             xs.push(Intersection {
                 obj: Box::new(Shape::Cylinder(self.clone())),
+                t: t
+            });
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Cone {
+    pub transform: Matrix4x4,
+    pub material: Material,
+    pub minimum: f64,
+    pub maximum: f64,
+    pub closed: bool,
+    saved_ray: Cell<Option<Ray>>
+}
+
+impl Intersectable for Cone {
+    fn intersect(&self, ray: &Ray) -> Intersections {
+    // Cone is unit radius with main axis along the y-axis.
+    // The intersection algorithm is same as that of a circle on the x-z plane
+        let ray = ray.transform(&self.get_transform().inverse());
+        self.saved_ray.set(Some(ray));
+
+        let mut intersections: Vec<_> = vec![];
+        let mut a = ray.dir().x.powi(2) - ray.dir().y.powi(2) + ray.dir().z.powi(2);
+        // 2 * o_x*d_x - 2 * o_y*d_y + 2 * o_z * d_z 
+        let b = (2.0 * ray.origin().x).mul_add(ray.dir().x, - 2.0 * ray.origin().y * ray.dir().y)  
+            + 2.0 * ray.origin().z * ray.dir().z;
+        let c = ray.origin().x.mul_add(ray.origin().x, - (ray.origin().y.powi(2) )) + ray.origin().z.powi(2);
+
+        if f64_eq(a, 0.0) && f64_eq(b, 0.0) {
+            //return vec![];
+            self.intersect_caps(&ray, &mut intersections);
+            return intersections; 
+        } else if f64_eq(a, 0.0) {
+            println!("intersect once");
+            intersections.push(Intersection {
+                obj: Box::new(Shape::Cone(self.clone())),
+                t: -c/(2.0 * b)
+            });
+            self.intersect_caps(&ray, &mut intersections);
+            println!("intersect once and with caps. {} ", intersections.len());
+            return intersections;
+        }
+
+        let discr = b.powf(2.0) - (4.0 * a * c);
+
+        if discr < 0.0 {
+            return vec![];
+        }
+        let mut t0 =  (-b - discr.sqrt()) / (2.0 * a);
+        let mut t1 = (-b + discr.sqrt()) / (2.0 * a);
+        
+        if t0 > t1 { 
+            mem::swap(&mut t0, &mut t1);
+        }
+
+        let y0 = t0.mul_add(ray.dir().y, ray.origin().y);
+        if self.minimum < y0 && y0 < self.maximum {
+            intersections.push(Intersection {
+                obj: Box::new(Shape::Cone(self.clone())),
+                t: t0
+            });
+        }
+        println!("t0 intersections: {}", intersections.len());
+//        println!("int: {:?}", intersections);
+        let y1 =  t1.mul_add(ray.dir().y,ray.origin().y);
+        if self.minimum < y1 && y1 < self.maximum {
+            intersections.push(Intersection {
+                obj: Box::new(Shape::Cone(self.clone())),
+                t: t1
+            });
+        }
+
+        println!("t1 intersections: {}", intersections.len());
+ //       println!("int: {:?}", intersections);
+        self.intersect_caps(&ray, &mut intersections);
+        println!("aftercaps  intersections: {}", intersections.len());
+  //      println!("int: {:?}", intersections);
+        intersections
+    }
+
+    fn eq(&self, other: &Shape) -> bool {
+        match other {
+            Shape::Cone(ref cylinder) => {
+                self.get_transform().eq(&cylinder.get_transform())
+            },
+            _ => { false }
+        }
+    }
+
+    fn set_transform(&mut self, m: Matrix4x4) {
+        self.transform = m
+    }
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
+    }
+    fn normal_at_local(&self, p: Vector4D) -> Vector4D {
+        let dist = (p.x.powf(2.0) + p.z.powf(2.0)).sqrt();
+        println!("normal: p: {:?}, dist: {}, max: {} min: {}", p, dist, self.maximum, self.minimum);
+        if dist < self.maximum.abs() && p.y >= (self.maximum - (utils::EPSILON)) {
+            Vector4D::new_vector(0.0, 1.0, 0.0)
+        } else if dist < self.minimum.abs() && p.y <= (self.minimum + (utils::EPSILON)) {
+            Vector4D::new_vector(0.0, -1.0, 0.0)
+        } else {
+            let mut y = (p.x.powf(2.0) + p.z.powf(2.0)).sqrt();
+            if p.y > 0.0 {
+                y = -y;
+            }
+            Vector4D::new_vector(p.x, y , p.z)
+        }
+    }
+    fn get_material(&self) -> Material {
+        self.material.clone()
+    }
+    fn set_material(&mut self, material: Material) {
+        self.material = material.clone();
+    }
+
+    fn saved_ray(&self) -> Option<Ray> {
+        self.saved_ray.get()
+    }
+}
+
+impl Cone {
+    pub fn new() -> Cone {
+        Cone {
+            material: Default::default(),
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None),
+            minimum: -utils::INFINITY,
+            maximum: utils::INFINITY,
+            closed: false,
+        }
+    }
+    pub fn new_truncated(min: f64, max: f64, closed: bool) -> Cone {
+        Cone {
+            material: Default::default(),
+            transform: Matrix4x4::new(),
+            saved_ray: Cell::new(None),
+            minimum: min,
+            maximum: max,
+            closed: closed,
+        }
+    }
+
+    pub fn check_cap(&self, ray: &Ray, t: f64, y: f64) -> bool {
+        let x = ray.origin().x + t * ray.dir().x;
+        let z = ray.origin().z + t * ray.dir().z;
+        (x.powf(2.0) + z.powf(2.0)) <= y.powf(2.0) 
+    }
+
+    pub fn intersect_caps(&self, ray: &Ray, xs: &mut Intersections) {
+        if !self.closed || f64_eq(ray.dir().y, 0.0) {
+            return;
+        }
+
+        let mut t = (self.minimum - ray.origin().y) / ray.dir().y;
+        if self.check_cap(ray, t, self.minimum) {
+            xs.push(Intersection {
+                obj: Box::new(Shape::Cone(self.clone())),
+                t: t
+            });
+        }
+
+        t = (self.maximum - ray.origin().y) / ray.dir().y;
+        if self.check_cap(ray, t, self.maximum) {
+            xs.push(Intersection {
+                obj: Box::new(Shape::Cone(self.clone())),
                 t: t
             });
         }

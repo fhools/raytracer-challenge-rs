@@ -1,5 +1,6 @@
 pub const EPSILON: f64 = 0.0001;
-pub const INFINITY: f64 = 10e40;
+pub const SHADOW_EPSILON: f64 = 0.0001;
+pub const INFINITY: f64 = 1e7;
 #[macro_export]
 macro_rules! assert_f64_eq {
     ($left:expr , $right:expr) => ({

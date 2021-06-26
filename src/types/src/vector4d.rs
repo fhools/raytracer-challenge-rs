@@ -38,7 +38,7 @@ impl Vector4D {
     }
 
     pub fn norm(&self) -> f64 {
-        let norm_sqr = self.x * self.x + self.y * self.y + self.z * self.z;
+        let norm_sqr = self.x.powi(2) + self.y.powi(2) + self.z.powi(2);
         norm_sqr.sqrt()
     }
 

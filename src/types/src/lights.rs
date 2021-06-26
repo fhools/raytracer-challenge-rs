@@ -27,7 +27,7 @@ pub fn lighting(material: Material,
                 light: LightSource, 
                 point: Vector4D, eyev: Vector4D, normalv: Vector4D, shadow: bool) -> Color {
 
-    println!("lighting obj: {:?}\nshadow:{}", shape, shadow); 
+    //println!("lighting obj: {:?}\nshadow:{}", shape, shadow); 
    
     let object : &dyn Intersectable;
     match *shape {
@@ -44,6 +44,9 @@ pub fn lighting(material: Material,
             object = o;
         },
         Shape::Cylinder(ref o) => {
+            object = o;
+        },
+        Shape::Cone(ref o) => {
             object = o;
         },
     }

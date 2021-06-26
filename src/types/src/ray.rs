@@ -85,6 +85,10 @@ impl Ray {
                 normalv = o.normal_at(p);
                 obj = Shape::Cylinder(o.clone());
             },
+            Shape::Cone(o) => {
+                normalv = o.normal_at(p);
+                obj = Shape::Cone(o.clone());
+            },
         }
 
         if normalv.dot(eyev) < 0.0 {
@@ -101,7 +105,6 @@ impl Ray {
         for  i in xs.iter() {
             let i_obj = &i.obj; 
             let hit_obj = &hit.obj;
-            let i_is_eq_hit = (*i_obj).eq(&*hit_obj);
             if f64_eq(hit.t, i.t) {
                 if containers.len() == 0 {
                     refract_n1 = refractive_indices::VACUUM; 
@@ -132,8 +135,8 @@ impl Ray {
         }
         // Used during shadow computation, so that shadow ray doesn't intersect the point of
         // intersection at object, we compute a point above the normal
-        let over_point = p + 1.0*utils::EPSILON*normalv; // direciton of normal above point of intersection
-        let under_point = p - 1.0*utils::EPSILON*normalv; // direction away from normal below point of intersection
+        let over_point = p + utils::SHADOW_EPSILON*normalv; // direciton of normal above point of intersection
+        let under_point = p - utils::SHADOW_EPSILON*normalv; // direction away from normal below point of intersection
         ShadeComputation {
             t: intersection.t,
             obj: Box::new(obj),
@@ -192,25 +195,22 @@ pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: u
                             sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point));
     let reflected = world.reflected_color(sc, reflect_rays_remaining);
     let refracted = world.refracted_color(sc, reflect_rays_remaining);
-    println!("shade_hit: {} surface color: {:?} reflected color: {:?}\nrefracted color: {:?}",
-             reflect_rays_remaining, surface, reflected, refracted);
+    //println!("shade_hit: {} surface color: {:?} reflected color: {:?}\nrefracted color: {:?}",
+    //         reflect_rays_remaining, surface, reflected, refracted);
 
     let mut m  = sc.obj.get_material();
     if m.reflective > 0.0 && m.transparency > 0.0 {
         let reflectance = schlick(&sc);
-        println!("schlick: {:?}", reflectance);
         return surface + reflected*reflectance + (1.0  - reflectance)*refracted;
     } else { 
         let total_color = surface + reflected + refracted;
-        println!("total_color: {:?}", total_color);
-        return surface + reflected + refracted;
+        return total_color; 
     }
 }
 
 pub fn color_at(world: &World, ray: Ray, remaining: usize) -> Color {
     let xs = ray.intersect_world(world);
     if let Some(hit) = hit(&xs) {
-        println!("color_at remaining: {:?}\n {:?}", remaining, hit);
         let sc = ray.prepare_computations(&hit, &xs);
         shade_hit(world, &sc, remaining)
     } else {
