@@ -14,6 +14,8 @@ use crate::positive_hits;
 use crate::color_at;
 use crate::ShadeComputation;
 use utils::*;
+use crate::global_do_debug;
+
 pub struct World {
     pub light_source: LightSource,
     pub objects: Vec<Shape>,
@@ -84,6 +86,11 @@ impl World {
         let ray_to_light = Ray::new(point, to_light_vec);
         let xs = ray_to_light.intersect_world(self);
         if let Some(a_xs) = hit(&xs) {
+            unsafe {
+            if let Some(true) = global_do_debug {
+                println!("bad shadow: xs:{:?}, ray_to_light: {:?}", xs, ray_to_light);
+            }
+            }
             a_xs.t < distance_to_light 
         } else  {
             false

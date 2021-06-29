@@ -98,6 +98,8 @@ impl Ray {
             inside = false;
         }
 
+        // =================================
+        // compute the n1 n2 refraction values
         let mut refract_n1 = refractive_indices::VACUUM;
         let mut refract_n2 = refractive_indices::VACUUM;
         let hit : &Intersection = intersection;
@@ -137,7 +139,7 @@ impl Ray {
         // intersection at object, we compute a point above the normal
         let over_point = p + utils::SHADOW_EPSILON*normalv; // direciton of normal above point of intersection
         let under_point = p - utils::SHADOW_EPSILON*normalv; // direction away from normal below point of intersection
-        ShadeComputation {
+        let sc = ShadeComputation {
             t: intersection.t,
             obj: Box::new(obj),
             point: p,
@@ -149,7 +151,10 @@ impl Ray {
             reflectv: reflect(self.dir(), normalv),
             n1: refract_n1,
             n2: refract_n2, 
-        }
+            do_debug: None,
+        };
+        sc
+        
     }
 
     pub fn transform(&self, m: &Matrix4x4) -> Ray {
@@ -160,6 +165,7 @@ impl Ray {
     }
 }
 
+#[derive(Debug)]
 pub struct ShadeComputation {
     pub t: f64,
     pub obj: Box<Shape>,
@@ -172,18 +178,32 @@ pub struct ShadeComputation {
     pub reflectv: Vector4D,
     pub n1: f64, // Refraction index 1
     pub n2: f64, // Refraction index 2
+    // Debug
+    pub do_debug : Option<bool>
 }
+pub static mut global_do_debug: Option<bool> = None;
 
 pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: usize) -> Color {
+    unsafe {
+    if let Some(_) = sc.do_debug {
+        global_do_debug = Some(true);
+    }
+    }
     let surface =  lighting(sc.obj.get_material(), 
                             &*sc.obj, 
                             world.light_source,
                             sc.over_point, sc.eyev, sc.normalv, world.is_shadowed(sc.over_point));
     let reflected = world.reflected_color(sc, reflect_rays_remaining);
     let refracted = world.refracted_color(sc, reflect_rays_remaining);
-    //println!("shade_hit: {} surface color: {:?} reflected color: {:?}\nrefracted color: {:?}",
-    //         reflect_rays_remaining, surface, reflected, refracted);
+    if let Some(_) = sc.do_debug {
+    println!("shade_hit: {} surface color: {:?} reflected color: {:?}\nrefracted color: {:?}",
+             reflect_rays_remaining, surface, reflected, refracted);
+    }
 
+    //DEBUG , clear debug 
+    unsafe {
+    global_do_debug = None;
+    }
     let mut m  = sc.obj.get_material();
     if m.reflective > 0.0 && m.transparency > 0.0 {
         let reflectance = schlick(&sc);
@@ -196,10 +216,31 @@ pub fn shade_hit(world: &World, sc: &ShadeComputation, reflect_rays_remaining: u
 
 pub fn color_at(world: &World, ray: Ray, remaining: usize) -> Color {
     let xs = ray.intersect_world(world);
+    let mut do_debug = false;
+    // Debug
+    if ray.origin().x == 0.0 && ray.origin().y == 5.0 && ray.origin().z == 0.0 && 
+        f64_eq(ray.dir().x, -0.48060956)  && f64_eq(ray.dir().y, -0.8408486) && f64_eq(ray.dir().z, 0.2489737) {
+            println!("bad ray: {:?}\nxs{:?}", ray, xs);
+            do_debug = true;
+    }
     if let Some(hit) = hit(&xs) {
-        let sc = ray.prepare_computations(&hit, &xs);
-        shade_hit(world, &sc, remaining)
+        let mut sc = ray.prepare_computations(&hit, &xs);
+        if do_debug {
+            sc.do_debug = Some(true);
+            println!("sc:{:?}", sc);
+        }
+        //DEBUG
+        let color = shade_hit(world, &sc, remaining);
+        if ray.origin().x == 0.0 && ray.origin().y == 5.0 && ray.origin().z == 0.0 && 
+            f64_eq(ray.dir().x, -0.48060956)  && f64_eq(ray.dir().y, -0.8408486) && f64_eq(ray.dir().z, 0.2489737) {
+                println!("bad ray: {:?}\n color: {:?}", ray, color);
+        }
+        color
     } else {
+            if ray.origin().x == 0.0 && ray.origin().y == 5.0 && ray.origin().z == 0.0 && 
+                f64_eq(ray.dir().x, -0.48060956)  && f64_eq(ray.dir().y, -0.8408486) && f64_eq(ray.dir().z, 0.2489737) {
+                println!("bad ray: {:?}\n color black", ray);
+            }
         Color::BLACK
     }
 }

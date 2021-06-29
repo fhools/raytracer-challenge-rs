@@ -17,6 +17,15 @@ impl Matrix4x4 {
         m
     }
 
+    pub fn remove_bad_zeros(&mut self) {
+        for i in 0..4 {
+            for j in 0..4 {
+                if f64_eq(self.m[i][j] , 0.0) {
+                    self.m[i][j] = 0.0;
+                }
+            }
+        }
+    }
 
     pub fn from_vectors(r1: &[f64], r2: &[f64], r3: &[f64], r4: &[f64]) -> Matrix4x4 {
         let mut m = Matrix4x4 {
@@ -460,6 +469,7 @@ impl MatrixChainer {
            while let Some(n) = self.operations.pop() {
                m = n.mul(&m);
            }
+           m.remove_bad_zeros();
            return m
        }
        panic!("no operations on MatrixChainer");

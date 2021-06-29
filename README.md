@@ -1,4 +1,5 @@
 # raytracer-challenge-rs
+
 This is an implementation of the raytracer from the book The Ray Tracer 
 Challenge by Jamis Buck using the Rust programming language
 
@@ -17,8 +18,19 @@ These show up as dark pixels in a arc across the image. It seems to be related t
 colors. It disppaears if we set the REFLECT_RAYS to 1, and shows if we set it greater than one
 
 When we disabled shadows, the glitch also went away. This means that somehow the reflection ray is probably striking
-the cone where the color is pure black. 
+the cone where the color is pure black.  When this glitch occured we also had the Light source at -20, 10, -5 and the
+cone was : 
+```
+  obj.set_transform(MatrixChainer::new()                                                                                                                                                                                                                   │ 
+                           .then(Matrix4x4::rotate_x(-PI/4.0))                                                                                                                                                                                                  │ 
+                           .then(Matrix4x4::rotate_z(PI/2.0))                                                                                                                                                                                                   │9
+                           //.then(Matrix4x4::rotate_z(PI/2.0))                                                                                                                                                                                                │ 
+                          .then(Matrix4x4::translation(0.5, -1.0, 0.5))                                                                                                                                                                                         │ 
+                          .then(Matrix4x4::scaling(1.0, 1.0, 1.0))
+```
 
+The shadow glitch is narrowed down to Cone::intersect, had to increase test of f64_eq(a, 0) to a.abs() < 0.000000001
+The f64_eq(a, 0.0) with epsilon of 0.00001 was too high. This fixes the issue, but not sure if its resolved.
 # FAQ
 
 Q: How do I actually render an image?

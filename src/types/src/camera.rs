@@ -57,5 +57,10 @@ pub fn ray_for_pixel(camera: &Camera, px: usize, py: usize) -> Ray {
     // This is where the 4D part comes in I guess.
     let origin = camera.transform.inverse().mul_vector4d(&Vector4D::new_point(0.0, 0.0, 0.0)); 
     let dir = (world_pixel - origin).normalized();
-    Ray::new(origin, dir)
+    let ray = Ray::new(origin, dir);
+    // DEBUG
+    if px == 3 && py == 70 {
+        println!("Ray for 3,70 bad px = {:?}", ray);
+    }
+    ray
 }

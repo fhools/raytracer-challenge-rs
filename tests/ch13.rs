@@ -175,7 +175,7 @@ fn test_render_gold_cone() {
     let mut obj = Cone::new_truncated(-1.5, 1.5, true);
     //let mut obj = Cone::new();
     obj.set_transform(MatrixChainer::new()
-                        .then(Matrix4x4::rotate_x(-PI/4.0))
+                        .then(Matrix4x4::rotate_x(-PI/6.0))
                         .then(Matrix4x4::rotate_z(PI/2.0))
                         //.then(Matrix4x4::rotate_z(PI/2.0))
                        .then(Matrix4x4::translation(0.5, -1.0, 0.5))
@@ -183,8 +183,9 @@ fn test_render_gold_cone() {
                        .finish());
     let mut obj_mat: Material = Default::default();
     obj_mat.color = Color::new(1.0, 0.8431, 0.0);
-    obj_mat.refractive_index = refractive_indices::GLASS;
+    obj_mat.refractive_index = refractive_indices::DEFAULT; 
     obj_mat.reflective = 0.0;
+    obj_mat.ambient = 0.3;
     //obj_mat.transparency = 0.8;
     obj.set_material(obj_mat);
 
@@ -195,21 +196,23 @@ fn test_render_gold_cone() {
                        .then(Matrix4x4::translation(0.0, -6.0, 0.0))
                        .finish());
     let mut wall_mat: Material = Default::default();
-    wall_mat.color = Color::new(1.0, 0.8431, 0.0);
+    wall_mat.color = Color::new(1.0, 1.0, 1.0);
     wall_mat.specular = 0.8;
     wall_mat.transparency = 0.0;
     wall_mat.reflective = 0.0;
     wall_mat.refractive_index = refractive_indices::DEFAULT; 
-    wall_mat.pattern = Some(Box::new(Pattern::CheckeredPattern(CheckeredPattern::new(Color::new(1.0, 0.0, 0.0), Color::new(1.0, 1.0, 1.0)))));
+    //wall_mat.pattern = Some(Box::new(Pattern::CheckeredPattern(CheckeredPattern::new(Color::new(1.0, 0.0, 0.0), Color::new(1.0, 1.0, 1.0)))));
     wall_mat.no_cast_shadow = true;
     wall.set_material(wall_mat);
     world.objects.push(Shape::Plane(wall));
 
     let mut canvas = Canvas::new(WIDTH_PX, HEIGHT_PX);
-    const WIDTH_PX: usize = 400;
-    const HEIGHT_PX: usize = 400;
+    const WIDTH_PX: usize = 700;
+    const HEIGHT_PX: usize = 500;
     world.light_source = LightSource::new(Color::new(1.0, 1.0, 1.0), 
+                                          // shadow glitches
                                           Vector4D::new_point(-20.0, 10.0, -5.0));
+                                          //Vector4D::new_point(0.0, 10.0, 0.0));
 
     let mut c = Camera::new(WIDTH_PX, HEIGHT_PX, PI/3.0);
     let from = Vector4D::new_point(0.0, 5.0, 0.0);

@@ -25,7 +25,7 @@ impl LightSource {
 pub fn lighting(material: Material, 
                 shape: &Shape,
                 light: LightSource, 
-                point: Vector4D, eyev: Vector4D, normalv: Vector4D, shadow: bool) -> Color {
+                point: Vector4D, eyev: Vector4D, normalv: Vector4D, is_shadow: bool) -> Color {
 
     //println!("lighting obj: {:?}\nshadow:{}", shape, shadow); 
    
@@ -78,7 +78,7 @@ pub fn lighting(material: Material,
     
     let diffuse; 
     let specular;
-    if light_dot_normal < 0.0 || shadow {
+    if light_dot_normal < 0.0 || is_shadow {
         diffuse = Color::BLACK;
         specular = Color::BLACK;
     } else {
