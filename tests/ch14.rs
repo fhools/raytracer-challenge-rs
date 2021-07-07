@@ -19,16 +19,16 @@ fn test_testshape_no_parent() {
 
 #[test]
 fn test_group_add() {
-    let mut g = Group::new(100);
+    let mut g = Group::new(700);
     let t = TestShape::new();
     g.add_child(Shape::TestShape(t)); 
     let parent = g.children[0].get_parent().unwrap();
-    assert_eq!(parent.id, 100);
+    assert_eq!(parent.id, 700);
 }
 
 #[test]
 fn test_group_intersect() {
-    let mut g = Group::new(100);
+    let mut g = Group::new(600);
     let s1 = Sphere::new();
     let mut s2 = Sphere::new();
     s2.set_transform(Matrix4x4::translation(0.0, 0.0, -3.0));
@@ -53,8 +53,7 @@ fn test_group_intersect() {
 
 #[test]
 fn test_group_transformed_instersect() {
-    let mut group_repo = GroupRepository::new();
-    let mut g = group_repo.new_group();
+    let mut g = Group::new(500);
     g.set_transform(Matrix4x4::scaling(2.0, 2.0, 2.0));
     let mut s = Sphere::new();
     s.set_transform(Matrix4x4::translation(5.0, 0.0, 0.0));
@@ -69,12 +68,10 @@ fn test_group_transformed_instersect() {
 fn test_group_world_to_object_space() {
     let mut s = Sphere::new();
     s.set_transform(Matrix4x4::translation(5.0, 0.0, 0.0));
-    let mut g2 = Group::new(100);
+    let mut g2 = Group::new(400);
     g2.set_transform(Matrix4x4::scaling(2.0, 2.0, 2.0));
     g2.add_child(Shape::Sphere(s));
-
-
-    let mut g1 = Group::new(101);
+    let mut g1 = Group::new(401);
     g1.set_transform(Matrix4x4::rotate_y(PI/2.0));
     g1.add_child(Shape::Group(g2));
 
@@ -91,10 +88,10 @@ fn test_group_world_to_object_space() {
 fn test_normal_to_world() {
     let mut s = Sphere::new();
     s.set_transform(Matrix4x4::translation(5.0, 0.0, 0.0));
-    let mut g2 = Group::new(100);
+    let mut g2 = Group::new(200);
     g2.set_transform(Matrix4x4::scaling(1.0, 2.0, 3.0));
     g2.add_child(Shape::Sphere(s));
-    let mut g1 = Group::new(101);
+    let mut g1 = Group::new(201);
     g1.set_transform(Matrix4x4::rotate_y(PI/2.0));
     g1.add_child(Shape::Group(g2));
 
@@ -102,6 +99,26 @@ fn test_normal_to_world() {
         Shape::Group(ref g) => {
             let normal = g.children[0].normal_to_world(Vector4D::new_vector(3.0f64.sqrt()/3.0, 3.0f64.sqrt()/3.0, 3.0f64.sqrt()/3.0));
             assert_vector4d_eq!(normal, Vector4D::new_vector(0.2857, 0.4286, -0.8571));
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn test_normal_child_object() {
+    let mut s = Sphere::new();
+    s.set_transform(Matrix4x4::translation(5.0, 0.0, 0.0));
+    let mut g2 = Group::new(300);
+    g2.set_transform(Matrix4x4::scaling(1.0, 2.0, 3.0));
+    g2.add_child(Shape::Sphere(s));
+    let mut g1 = Group::new(301);
+    g1.set_transform(Matrix4x4::rotate_y(PI/2.0));
+    g1.add_child(Shape::Group(g2));
+
+    match g1.children[0] {
+        Shape::Group(ref g) => {
+            let normal = g.children[0].normal_at(Vector4D::new_point(1.7321, 1.11547, -5.5774));
+            assert_vector4d_eq!(normal, Vector4D::new_vector(0.28747, 0.41654, -0.862466));
         }
         _ => {}
     }

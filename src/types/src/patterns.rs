@@ -18,7 +18,7 @@ pub trait Patternable {
     fn get_transform(&self) -> Matrix4x4;
     fn pattern_at(&self, point: Vector4D) -> Color;
     fn pattern_at_object(&self, obj: &dyn Intersectable, world_point: Vector4D) -> Color {
-        let object_point = obj.get_transform().inverse().mul_vector4d(&world_point);
+        let object_point = obj.world_to_object(world_point);
         let pattern_point = self.get_transform().inverse().mul_vector4d(&object_point);
         self.pattern_at(pattern_point)
     }

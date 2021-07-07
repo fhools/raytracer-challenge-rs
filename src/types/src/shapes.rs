@@ -326,6 +326,7 @@ pub trait Intersectable {
     fn eq(&self, other: &Shape) -> bool;
     fn set_transform(&mut self, m: Matrix4x4);
     fn get_transform(&self) -> Matrix4x4;
+    /*
     fn normal_at(&self, world_p: Vector4D) -> Vector4D {
         let obj_point = self.get_transform().inverse().mul_vector4d(&world_p);
         let obj_normal = self.normal_at_local(obj_point);
@@ -341,6 +342,13 @@ pub trait Intersectable {
         n.w = 0.0;
         n
     }
+    */
+    fn normal_at(&self, world_point: Vector4D) -> Vector4D {
+        let local_point = self.world_to_object(world_point);
+        let local_normal = self.normal_at_local(local_point);
+        self.normal_to_world(local_normal)
+    }
+
     fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D;
 
     fn normal_to_world(&self, mut normal: Vector4D) -> Vector4D {
@@ -1065,8 +1073,12 @@ impl Intersectable for Group {
     }
 
     fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D {
+        panic!("normal_at_local called on group");
+        /*
         let obj_normal = obj_point - Vector4D::new_point(0.0, 0.0, 0.0);
         obj_normal
+        */
+        obj_point
     }
     fn get_material(&self) -> Material {
         self.material.clone()
