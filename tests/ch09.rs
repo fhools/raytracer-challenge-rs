@@ -7,17 +7,6 @@ extern crate raytracer_challenge_rs;
 use raytracer_challenge_rs::{Canvas, render};
 
 
-#[test]
-fn intersect_sphere_saved_ray() {
-    let r = Ray::new(Vector4D::new_point(0.0, 0.0, -5.0),
-                     Vector4D::new_vector(0.0, 0.0, 1.0));
-    let mut o = Sphere::new();
-    o.set_transform(Matrix4x4::scaling(2.0, 2.0, 2.0));
-    let _xs = o.intersect(&r);
-    
-    assert_vector4d_eq!(o.saved_ray().unwrap().origin, Vector4D::new_point(0.0, 0.0, -2.5));
-    assert_vector4d_eq!(o.saved_ray().unwrap().direction, Vector4D::new_vector(0.0, 0.0, 0.5));
-}
 
 #[test]
 fn intersect_plane() {

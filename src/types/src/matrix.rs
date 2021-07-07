@@ -469,7 +469,7 @@ impl MatrixChainer {
            while let Some(n) = self.operations.pop() {
                m = n.mul(&m);
            }
-           m.remove_bad_zeros();
+           //m.remove_bad_zeros();
            return m
        }
        panic!("no operations on MatrixChainer");

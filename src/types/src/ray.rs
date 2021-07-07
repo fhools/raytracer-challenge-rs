@@ -89,6 +89,10 @@ impl Ray {
                 normalv = o.normal_at(p);
                 obj = Shape::Cone(o.clone());
             },
+            Shape::Group(o) => {
+                normalv = o.normal_at(p);
+                obj = Shape::Group(o.clone());
+            },
         }
 
         if normalv.dot(eyev) < 0.0 {

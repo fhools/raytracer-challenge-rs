@@ -6,7 +6,14 @@ use crate::Matrix4x4;
 use crate::Ray;
 use crate::Material;
 use std::cell::Cell;
+use std::rc::Rc;
+use std::cell::RefCell;
 use crate::global_do_debug;
+use std::collections::HashMap;
+
+extern crate lazy_static;
+use lazy_static::lazy_static;
+
 #[derive(Clone, Debug)]
 pub enum Shape {
     Sphere(Sphere),
@@ -14,10 +21,38 @@ pub enum Shape {
     Plane(Plane),
     Cube(Cube),
     Cylinder(Cylinder),
-    Cone(Cone)
+    Cone(Cone),
+    Group(Group), 
 }
 
 impl Shape {
+
+    pub fn intersect(&self, ray: &Ray) -> Intersections {
+        match *self {
+            Shape::Sphere(ref o) => {
+                o.intersect(ray)
+            },
+            Shape::TestShape(ref o) => {
+               o.intersect(ray) 
+            },
+            Shape::Plane(ref o) => {
+               o.intersect(ray)
+            },
+            Shape::Cube(ref o) => {
+               o.intersect(ray)
+            },
+            Shape::Cylinder(ref o) => {
+               o.intersect(ray)
+            },
+            Shape::Cone(ref o) => {
+               o.intersect(ray)
+            },
+            Shape::Group(ref o) => {
+               o.intersect(ray)
+            },
+        }
+    }
+
     pub fn eq(&self, other: &Shape) -> bool {
         match *self {
             Shape::Sphere(ref s) => {
@@ -37,6 +72,9 @@ impl Shape {
             },
             Shape::Cone(ref c) => {
                 c.eq(&other)
+            },
+            Shape::Group(ref g) => {
+                g.eq(&other)
             },
         }
     }
@@ -61,6 +99,10 @@ impl Shape {
             Shape::Cone(ref c) => {
                 c.get_material()
             },
+            // FIXME: a group does not have a material
+            Shape::Group(ref g) => {
+                Default::default()
+            },
         }
     }
 
@@ -83,6 +125,10 @@ impl Shape {
             },
             Shape::Cone(ref mut c) => {
                 c.set_material(material.clone())
+            },
+            // FIXME: a group does not have a material
+            Shape::Group(ref mut g) => {
+                //g.set_material(material.clone())
             },
         }
     }
@@ -107,6 +153,116 @@ impl Shape {
             },
             Shape::Cone(ref o) => {
                 o.normal_at(point)
+            },
+            Shape::Group(ref o) => {
+                o.normal_at(point)
+            },
+        }
+    }
+
+    pub fn set_parent(&mut self, parent: Group)  {  
+        println!("set_parent: {:?}", parent);
+        match *self {
+            Shape::Sphere(ref mut o) => {
+                o.set_parent(parent)
+            },
+            Shape::TestShape(ref mut o) => {
+                o.set_parent(parent)
+            },
+            Shape::Plane(ref mut o) => {
+                o.set_parent(parent)
+            },
+            Shape::Cube(ref mut o) => {
+                o.set_parent(parent)
+            },
+            Shape::Cylinder(ref mut o) => {
+                o.set_parent(parent)
+            },
+            Shape::Cone(ref mut o) => {
+                o.set_parent(parent)
+            },
+            Shape::Group(ref mut o) => {
+                o.set_parent(parent)
+            },
+        }
+    }
+
+
+    pub fn get_parent(&self) -> Option<Group> {
+        match *self {
+            Shape::Sphere(ref o) => {
+                o.get_parent()
+            },
+            Shape::TestShape(ref o) => {
+                o.get_parent()
+            },
+            Shape::Plane(ref o) => {
+                o.get_parent()
+            },
+            Shape::Cube(ref o) => {
+                o.get_parent()
+            },
+            Shape::Cylinder(ref o) => {
+                o.get_parent()
+            },
+            Shape::Cone(ref o) => {
+                o.get_parent()
+            },
+            Shape::Group(ref o) => {
+                o.get_parent()
+            },
+        }
+    }
+
+
+    pub fn world_to_object(&self, world_point: Vector4D) -> Vector4D {
+        match *self {
+            Shape::Sphere(ref o) => {
+                o.world_to_object(world_point)
+            },
+            Shape::TestShape(ref o) => {
+                o.world_to_object(world_point)
+            },
+            Shape::Plane(ref o) => {
+                o.world_to_object(world_point)
+            },
+            Shape::Cube(ref o) => {
+                o.world_to_object(world_point)
+            },
+            Shape::Cylinder(ref o) => {
+                o.world_to_object(world_point)
+            },
+            Shape::Cone(ref o) => {
+                o.world_to_object(world_point)
+            },
+            Shape::Group(ref o) => {
+                o.world_to_object(world_point)
+            },
+        }
+    }
+
+    pub fn normal_to_world(&self, world_point: Vector4D) -> Vector4D {
+        match *self {
+            Shape::Sphere(ref o) => {
+                o.normal_to_world(world_point)
+            },
+            Shape::TestShape(ref o) => {
+                o.normal_to_world(world_point)
+            },
+            Shape::Plane(ref o) => {
+                o.normal_to_world(world_point)
+            },
+            Shape::Cube(ref o) => {
+                o.normal_to_world(world_point)
+            },
+            Shape::Cylinder(ref o) => {
+                o.normal_to_world(world_point)
+            },
+            Shape::Cone(ref o) => {
+                o.normal_to_world(world_point)
+            },
+            Shape::Group(ref o) => {
+                o.normal_to_world(world_point)
             },
         }
     }
@@ -186,24 +342,41 @@ pub trait Intersectable {
         n
     }
     fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D;
+
+    fn normal_to_world(&self, mut normal: Vector4D) -> Vector4D {
+        println!("normal_to_world: {:?}", normal);
+        normal = self.get_transform().inverse().transpose().mul_vector4d(&normal);
+        normal.w = 0.0;
+        normal.normalize();
+        if let Some(parent) = self.get_parent() {
+            normal = parent.normal_to_world(normal);
+        }
+        normal
+    }
+
+    fn world_to_object(&self, mut world_point: Vector4D) -> Vector4D {
+        if let Some(parent) = self.get_parent() { 
+            world_point = parent.world_to_object(world_point);
+        }
+        self.get_transform().inverse().mul_vector4d(&world_point) 
+    }
+
     fn get_material(&self) -> Material;
     fn set_material(&mut self, material: Material);
-
-
-    fn saved_ray(&self) -> Option<Ray>;
+    fn get_parent(&self) -> Option<Group>;
+    fn set_parent(&mut self, parent: Group);
 }
 
 #[derive(Debug, Clone)]
 pub struct TestShape {
    pub transform: Matrix4x4,
    pub material: Material,
-   saved_ray: Cell<Option<Ray>>
+   pub parent: Option<usize>,
 }
 
 impl Intersectable for TestShape {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.get_transform().inverse());
-        self.saved_ray.set(Some(ray));
         vec![]
     }
     fn eq(&self, other: &Shape) -> bool {
@@ -231,9 +404,15 @@ impl Intersectable for TestShape {
     fn set_material(&mut self, material: Material) {
         self.material = material.clone();
     }
-
-    fn saved_ray(&self) -> Option<Ray> {
-        self.saved_ray.get()
+    fn get_parent(&self) -> Option<Group> {
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
     }
 }
 
@@ -242,7 +421,7 @@ impl TestShape {
         TestShape {
             material: Default::default(),
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None)
+            parent: None,
         }
     }
 }
@@ -254,8 +433,8 @@ pub struct Sphere {
     pub radius: f64,
     pub transform: Matrix4x4,
     pub material: Material,
+    pub parent: Option<usize>,
 
-    saved_ray: Cell<Option<Ray>>
 }
 
 impl Intersectable for Sphere {
@@ -263,7 +442,6 @@ impl Intersectable for Sphere {
         // Transform the ray via the inverse of the objects transform, same as tranforming unit
         // sphere to in front of the camera.
         let ray = ray.transform(&self.get_transform().inverse());
-        self.saved_ray.set(Some(ray));
         let sphere_to_ray = ray.origin() - self.origin;
         let a = ray.dir().dot(ray.dir());
         let b = 2.0 * ray.dir().dot(sphere_to_ray);
@@ -284,11 +462,6 @@ impl Intersectable for Sphere {
             t: (-b + discriminant.sqrt()) / (2.0 * a)
         });
         intersections
-    }
-
-
-    fn saved_ray(&self) -> Option<Ray> {
-        self.saved_ray.get()
     }
 
     fn eq(&self, other: &Shape) -> bool {
@@ -323,6 +496,17 @@ impl Intersectable for Sphere {
     fn set_material(&mut self, mat: Material) {
         self.material = mat;
     }
+    fn get_parent(&self) -> Option<Group> {
+        println!("get_parent Sphere: {:?}", self);
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
+    }
 }
 
 impl Sphere {
@@ -332,7 +516,7 @@ impl Sphere {
             radius: 1.0,
             transform: Matrix4x4::new(),
             material: Default::default(),
-            saved_ray: Cell::new(None)
+            parent: None,
         }
     }
 
@@ -345,7 +529,7 @@ impl Sphere {
             radius: 1.0,
             transform: Matrix4x4::new(),
             material: m,
-            saved_ray: Cell::new(None)
+            parent: None,
         }
     }
 }
@@ -354,13 +538,12 @@ impl Sphere {
 pub struct Plane {
     pub transform: Matrix4x4,
     pub material: Material,
-    saved_ray: Cell<Option<Ray>>
+    pub parent: Option<usize>,
 }
 
 impl Intersectable for Plane {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.get_transform().inverse());
-        self.saved_ray.set(Some(ray));
         if ray.direction.y.abs() < EPSILON {
             vec![]
         } else {
@@ -394,9 +577,15 @@ impl Intersectable for Plane {
     fn set_material(&mut self, material: Material) {
         self.material = material.clone();
     }
-
-    fn saved_ray(&self) -> Option<Ray> {
-        self.saved_ray.get()
+    fn get_parent(&self) -> Option<Group> {
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
     }
 }
 
@@ -405,7 +594,7 @@ impl Plane {
         Plane {
             material: Default::default(),
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None),
+            parent: None,
         }
     }
 }
@@ -414,13 +603,12 @@ impl Plane {
 pub struct Cube {
     pub transform: Matrix4x4,
     pub material: Material,
-    saved_ray: Cell<Option<Ray>>
+    pub parent: Option<usize>,
 }
 
 impl Intersectable for Cube {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.get_transform().inverse());
-        self.saved_ray.set(Some(ray));
 
         let TMinMax(xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
         let TMinMax(ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
@@ -473,9 +661,15 @@ impl Intersectable for Cube {
     fn set_material(&mut self, material: Material) {
         self.material = material.clone();
     }
-
-    fn saved_ray(&self) -> Option<Ray> {
-        self.saved_ray.get()
+    fn get_parent(&self) -> Option<Group> {
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
     }
 }
 
@@ -484,7 +678,7 @@ impl Cube {
         Cube {
             material: Default::default(),
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None),
+            parent: None,
         }
     }
 
@@ -494,10 +688,10 @@ impl Cube {
 pub struct Cylinder {
     pub transform: Matrix4x4,
     pub material: Material,
+    pub parent: Option<usize>,
     pub minimum: f64,
     pub maximum: f64,
     pub closed: bool,
-    saved_ray: Cell<Option<Ray>>
 }
 
 impl Intersectable for Cylinder {
@@ -505,7 +699,6 @@ impl Intersectable for Cylinder {
     // Cylinder is unit radius with main axis along the y-axis.
     // The intersection algorithm is same as that of a circle on the x-z plane
         let ray = ray.transform(&self.get_transform().inverse());
-        self.saved_ray.set(Some(ray));
 
         let mut intersections: Vec<_> = vec![];
         let a = ray.dir().x.powf(2.0) + ray.dir().z.powf(2.0);
@@ -580,9 +773,15 @@ impl Intersectable for Cylinder {
     fn set_material(&mut self, material: Material) {
         self.material = material.clone();
     }
-
-    fn saved_ray(&self) -> Option<Ray> {
-        self.saved_ray.get()
+    fn get_parent(&self) -> Option<Group> {
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
     }
 }
 
@@ -590,8 +789,8 @@ impl Cylinder {
     pub fn new() -> Cylinder {
         Cylinder {
             material: Default::default(),
+            parent: None,
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None),
             minimum: -utils::INFINITY,
             maximum: utils::INFINITY,
             closed: false,
@@ -600,8 +799,8 @@ impl Cylinder {
     pub fn new_truncated(min: f64, max: f64, closed: bool) -> Cylinder {
         Cylinder {
             material: Default::default(),
+            parent: None,
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None),
             minimum: min,
             maximum: max,
             closed: closed,
@@ -641,10 +840,10 @@ impl Cylinder {
 pub struct Cone {
     pub transform: Matrix4x4,
     pub material: Material,
+    pub parent: Option<usize>,
     pub minimum: f64,
     pub maximum: f64,
     pub closed: bool,
-    saved_ray: Cell<Option<Ray>>
 }
 
 impl Intersectable for Cone {
@@ -652,7 +851,6 @@ impl Intersectable for Cone {
     // Cone is unit radius with main axis along the y-axis.
     // The intersection algorithm is same as that of a circle on the x-z plane
         let ray = ray.transform(&self.get_transform().inverse());
-        self.saved_ray.set(Some(ray));
 
         let mut intersections: Vec<_> = vec![];
         let mut a = ray.dir().x.powi(2) - ray.dir().y.powi(2) + ray.dir().z.powi(2);
@@ -755,9 +953,15 @@ impl Intersectable for Cone {
     fn set_material(&mut self, material: Material) {
         self.material = material.clone();
     }
-
-    fn saved_ray(&self) -> Option<Ray> {
-        self.saved_ray.get()
+    fn get_parent(&self) -> Option<Group> {
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
     }
 }
 
@@ -765,8 +969,8 @@ impl Cone {
     pub fn new() -> Cone {
         Cone {
             material: Default::default(),
+            parent: None,
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None),
             minimum: -utils::INFINITY,
             maximum: utils::INFINITY,
             closed: false,
@@ -776,7 +980,7 @@ impl Cone {
         Cone {
             material: Default::default(),
             transform: Matrix4x4::new(),
-            saved_ray: Cell::new(None),
+            parent: None,
             minimum: min,
             maximum: max,
             closed: closed,
@@ -810,4 +1014,152 @@ impl Cone {
             });
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct Group {
+   pub transform: Matrix4x4,
+
+   // TODO: Remove this.
+   pub material: Material,
+   pub id: usize,
+   pub parent: Option<usize>,
+
+   // Objects in this group 
+   pub children: Vec<Shape>,
+}
+
+#[derive(Debug, Clone)]
+pub struct GroupData {
+    pub id: usize,
+    pub transform: Matrix4x4,
+    pub material: Material,
+    pub parent: Option<usize>,
+    pub children: Vec<Shape>,
+}
+
+impl Intersectable for Group {
+    fn intersect(&self, ray: &Ray) -> Intersections {
+        let ray = ray.transform(&self.get_transform().inverse());
+        let mut xs = vec![];
+        for o in self.children.iter() {
+            xs.extend(o.intersect(&ray));
+        }
+        xs.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
+        xs
+    }
+    fn eq(&self, other: &Shape) -> bool {
+        match *other {
+            Shape::Group(ref _t) => { true },
+            _ => { false }
+        }
+    }
+
+    fn set_transform(&mut self, m: Matrix4x4) {
+        self.transform = m;
+        put_group(self.clone());
+    }
+
+    fn get_transform(&self) -> Matrix4x4 {
+        self.transform
+    }
+
+    fn normal_at_local(&self, obj_point: Vector4D) -> Vector4D {
+        let obj_normal = obj_point - Vector4D::new_point(0.0, 0.0, 0.0);
+        obj_normal
+    }
+    fn get_material(&self) -> Material {
+        self.material.clone()
+    }
+    fn set_material(&mut self, material: Material) {
+        self.material = material.clone();
+        put_group(self.clone());
+    }
+    fn get_parent(&self) -> Option<Group> {
+        println!("Group::get_parent: self: {:?}", self);
+        if let Some(parent_id) = self.parent {
+            Some(get_group(parent_id))
+        } else {
+            None
+        }
+    }
+    fn set_parent(&mut self, parent: Group) {
+        self.parent = Some(parent.id);
+    }
+}
+
+impl Group {
+    pub fn new(id: usize) -> Group {
+        let g = Group {
+            material: Default::default(),
+            parent: None,
+            id: id,
+            transform: Matrix4x4::new(),
+            children: vec![]
+        };
+        put_group(g.clone());
+        g
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.children.len() == 0
+    }
+
+    pub fn add_child(&mut self, mut shape: Shape) {
+        shape.set_parent(self.clone());
+        match shape {
+            Shape::Group(ref g) => {
+                put_group((*g).clone());
+            },
+            _ => {}
+        }
+        self.children.push(shape);
+        put_group(self.clone());
+    }
+}
+
+
+pub struct GroupRepository {
+    groups : HashMap<usize, Group>,
+    group_idx: usize
+}
+
+impl GroupRepository {
+    pub fn new() -> GroupRepository {
+        GroupRepository {
+            groups: HashMap::new(),
+            group_idx: 0,
+        }
+    }
+    pub fn new_group(&mut self) -> Group {
+        let idx = self.group_idx;
+        self.group_idx += 1;
+        self.groups.insert(idx, Group::new(idx));
+        self.get_group(idx)
+    }
+
+    pub fn get_group(&self, idx: usize) -> Group {
+        let grp = self.groups.get(&idx).unwrap();
+        (*grp).clone()
+    }
+
+    pub fn set_group(&mut self, group: &Group) {
+        self.groups.insert(group.id, group.clone());
+    }
+}
+
+use std::sync::Mutex;
+
+lazy_static! {
+    static ref GROUP_REPO: Mutex<HashMap<usize, Group>> = Mutex::new(HashMap::new());
+}
+fn get_group(id: usize) -> Group {
+    println!("get_group: {}", id);
+    let grp_repo = GROUP_REPO.lock().unwrap();
+    grp_repo.get(&id).unwrap().clone()
+}
+
+fn put_group(group: Group) {
+    let mut grp_repo = GROUP_REPO.lock().unwrap();
+    grp_repo.insert(group.id, group.clone());
 }

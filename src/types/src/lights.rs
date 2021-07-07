@@ -49,6 +49,12 @@ pub fn lighting(material: Material,
         Shape::Cone(ref o) => {
             object = o;
         },
+        // FIXME: Definately not right, can't light up a group directly
+        Shape::Group(ref o) => {
+            // HACK:
+            return Color::BLACK;
+        },
+
     }
     let effective_color = match material.pattern {
         None => { material.color },

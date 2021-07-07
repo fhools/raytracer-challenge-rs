@@ -168,6 +168,7 @@ fn test_cone_end_caps() {
     }
 }
 #[test]
+#[ignore="render"]
 fn test_render_gold_cone() {
     let mut world: World = Default::default();
     world.objects.clear();

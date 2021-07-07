@@ -51,6 +51,9 @@ impl World {
                 Shape::Cone(c) => {
                     vs.extend(ray.intersect(c));
                 },
+                Shape::Group(g) => {
+                    vs.extend(ray.intersect(g))
+                }
             }
 
         }
