@@ -27,3 +27,6 @@ pub use camera::*;
 
 mod patterns;
 pub use patterns::*;
+
+mod bounds;
+pub use bounds::*;

@@ -1,6 +1,6 @@
 use types::*;
 use crate::Canvas;
-const REFLECT_RAYS: usize = 1;
+const REFLECT_RAYS: usize = 3;
 pub fn render(camera: &Camera, world: &World, canvas: &mut Canvas) {
     for y in 0..(camera.vsize_px - 1) {
         for x in 0..(camera.hsize_px - 1) {

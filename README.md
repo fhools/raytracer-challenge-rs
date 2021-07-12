@@ -12,6 +12,10 @@ a result of a w = 2.0. Which we could then detect as an error?
 
 So far it looks like adding w component is the right call. 
 
+
+## Groups stores copies of it's child objects. Also same issue with Intersections list, its storing a copy of the objects. 
+This causes big memory issues. Rendering groups took 5 minutes and 30GB of memory used.
+
 ## Glitches with rendering cone.
 There is some kind of ray intersection floating point rounding errors occuring causing graphical glitches.
 These show up as dark pixels in a arc across the image. It seems to be related to the refracted and reflected

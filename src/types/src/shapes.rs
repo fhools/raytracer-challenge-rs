@@ -1,14 +1,11 @@
-use std::cmp;
 use std::mem;
 use utils::*;
 use crate::Vector4D;
 use crate::Matrix4x4;
 use crate::Ray;
 use crate::Material;
-use std::cell::Cell;
-use std::rc::Rc;
-use std::cell::RefCell;
 use crate::global_do_debug;
+use crate::Bounds;
 use std::collections::HashMap;
 
 extern crate lazy_static;
@@ -214,6 +211,32 @@ impl Shape {
         }
     }
 
+    pub fn set_transform(&mut self, transform: Matrix4x4) {
+        match *self {
+            Shape::Sphere(ref mut o) => {
+                o.set_transform(transform)
+            },
+            Shape::TestShape(ref mut o) => {
+                o.set_transform(transform)
+            },
+            Shape::Plane(ref mut o) => {
+                o.set_transform(transform)
+            },
+            Shape::Cube(ref mut o) => {
+                o.set_transform(transform)
+            },
+            Shape::Cylinder(ref mut o) => {
+                o.set_transform(transform)
+            },
+            Shape::Cone(ref mut o) => {
+                o.set_transform(transform)
+            },
+            Shape::Group(ref mut o) => {
+                o.set_transform(transform)
+            },
+        }
+    }
+
 
     pub fn world_to_object(&self, world_point: Vector4D) -> Vector4D {
         match *self {
@@ -371,8 +394,12 @@ pub trait Intersectable {
 
     fn get_material(&self) -> Material;
     fn set_material(&mut self, material: Material);
+
     fn get_parent(&self) -> Option<Group>;
     fn set_parent(&mut self, parent: Group);
+
+    fn get_bounds(&self) -> Bounds; 
+    
 }
 
 #[derive(Debug, Clone)]
@@ -421,6 +448,13 @@ impl Intersectable for TestShape {
     }
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
+    }
+
+    fn get_bounds(&self) -> Bounds {
+        Bounds {
+            min_point: Vector4D::new_point(0.0, 0.0, 0.0),
+            max_point: Vector4D::new_point(1.0, 1.0, 1.0)
+        }
     }
 }
 
@@ -515,6 +549,13 @@ impl Intersectable for Sphere {
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
     }
+
+    fn get_bounds(&self) -> Bounds {
+        Bounds {
+            min_point: Vector4D::new_point(-1.0, -1.0, -1.0),
+            max_point: Vector4D::new_point(1.0, 1.0, 1.0)
+        }
+    }
 }
 
 impl Sphere {
@@ -594,6 +635,13 @@ impl Intersectable for Plane {
     }
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
+    }
+
+    fn get_bounds(&self) -> Bounds {
+        Bounds {
+            min_point: Vector4D::new_point(-INFINITY, 0.0, -INFINITY),
+            max_point: Vector4D::new_point(INFINITY, 1.0, INFINITY)
+        }
     }
 }
 
@@ -678,6 +726,13 @@ impl Intersectable for Cube {
     }
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
+    }
+
+    fn get_bounds(&self) -> Bounds {
+        Bounds {
+            min_point: Vector4D::new_point(-1.0, -1.0, -1.0),
+            max_point: Vector4D::new_point(1.0, 1.0, 1.0)
+        }
     }
 }
 
@@ -790,6 +845,20 @@ impl Intersectable for Cylinder {
     }
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
+    }
+
+    fn get_bounds(&self) -> Bounds {
+        if self.closed {
+            Bounds {
+                min_point: Vector4D::new_point(-1.0, self.minimum, -1.0),
+                max_point: Vector4D::new_point(1.0, self.maximum, 1.0)
+            }
+        } else {
+            Bounds {
+                min_point: Vector4D::new_point(-1.0, -INFINITY, -1.0),
+                max_point: Vector4D::new_point(1.0, INFINITY, 1.0)
+            }
+        }
     }
 }
 
@@ -971,6 +1040,20 @@ impl Intersectable for Cone {
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
     }
+
+    fn get_bounds(&self) -> Bounds {
+        if self.closed {
+            Bounds {
+                min_point: Vector4D::new_point(-1.0, self.minimum, -1.0),
+                max_point: Vector4D::new_point(1.0, self.maximum, 1.0)
+            }
+        } else {
+            Bounds {
+                min_point: Vector4D::new_point(-1.0, -INFINITY, -1.0),
+                max_point: Vector4D::new_point(1.0, INFINITY, 1.0)
+            }
+        }
+    }
 }
 
 impl Cone {
@@ -1097,6 +1180,10 @@ impl Intersectable for Group {
     }
     fn set_parent(&mut self, parent: Group) {
         self.parent = Some(parent.id);
+    }
+
+    fn get_bounds(&self) -> Bounds {
+        todo!()
     }
 }
 

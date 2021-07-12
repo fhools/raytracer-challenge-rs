@@ -73,7 +73,7 @@ fn test_cube_normal_at() {
 
 
 #[test]
-#[ignore="render"]
+//#[ignore="render"]
 fn test_render_gold_cube() {
     let mut world: World = Default::default();
     world.objects.clear();
